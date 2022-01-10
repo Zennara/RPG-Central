@@ -29,6 +29,7 @@ client = discord.Client(intents=intents)
 #declare file lists
 adjectives = []
 items = []
+encounters = []
 
 @client.event
 async def on_ready():
@@ -44,6 +45,11 @@ async def on_ready():
     itm = file.readlines()
     global items
     items = [line.rstrip() for line in itm]
+  #encounters
+  with open("encounters.txt") as file:
+    encounter = file.readlines()
+    global encounters
+    encounters = [line.rstrip() for line in encounter]
 
 async def error(message, code):
   embed = discord.Embed(color=0xff0000, description=code)
@@ -123,6 +129,31 @@ async def on_message(message):
     #send message
     embed = discord.Embed(description=desc, color=color)
     await message.channel.send(embed=embed)
+
+  #chest manually
+  if messagecontent == prefix+"chest":
+    encounter = encounters[random.randint(0,len(encounters)-1)]
+    embed = discord.Embed(description="React to open!",color=0xFF0000)
+    embed.set_author(name=encounter,icon_url="https://cdn.discordapp.com/attachments/929182726203002920/929966082318536764/chestRed.png")
+    msg = await message.channel.send(embed=embed)
+    await msg.add_reaction("💎")
+
+    def check(reaction, user):
+      if reaction.message==msg and str(reaction.emoji)=="💎" and not user.bot:
+        asyncio.create_task(reaction.message.clear_reactions()) 
+        return True
+        
+    reaction, user = await client.wait_for('reaction_add', check=check)
+
+    adj = adjectives[random.randint(0,len(adjectives)-1)]
+    item = items[random.randint(0,len(items)-1)]
+    rarity = random.choices(rarities,chances)[0]
+    color = colors[rarities.index(rarity)]
+    addition = random.choices(additives,additiveChances)[0]
+    desc = "**["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+    embed = discord.Embed(description=desc, color=color) 
+    embed.set_author(name=user.name+" Opened:", icon_url=user.avatar_url)
+    await msg.edit(embed=embed)
 
 @client.event
 async def on_guild_join(guild):
