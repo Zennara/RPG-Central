@@ -70,6 +70,17 @@ colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
 additives = ["-2","-1","+0","+1","+2"]
 additiveChances = [5,15,50,15,5]
 
+#get webhook
+async def getWebhook(channel):
+  hooks = await channel.webhooks()
+  if hooks:
+    x=0
+    for hook in hooks:
+      if hook.token != None:
+        return hooks[x]
+      x += 1
+  return await channel.create_webhook(name="RPGCentral Required",avatar=None,reason="For the RPG Central commands.")
+
 @client.event
 async def on_message(message):
   #check for bots
@@ -168,6 +179,28 @@ async def on_message(message):
       #give item
       fullItem = rarity+"|"+adj+"|"+item+"|"+addition
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
+
+  #view bag
+  emojis = ['⚪','🟢','🔵','🟣','🟡']
+  texts = ""
+  count = 0
+  if messagecontent.startswith(prefix+"localbag") or messagecontent.startswith(prefix+"bag") or messagecontent.startswith(prefix+"globalbag"):
+    #check if in database
+    if str(message.author.id) in db["players"]:
+      for guild in db["players"][str(message.author.id)]:
+        for item in db["players"][str(message.author.id)][guild]:
+          count +=1
+          sections = item.split("|")
+          if messagecontent.startswith(prefix+"localbag") and int(guild) != message.guild.id:
+            break
+          texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[0])]+" **["+sections[0]+"]** "+sections[1]+" "+sections[2]+" "+sections[3]) + "\n"
+    else:
+      texts = "Your bag is offly empty."
+    #webhook = await getWebhook(message.channel)
+    embed = discord.Embed(description=texts, color=0xFFFFFF)
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
+    embed.set_author(name="Global Bag", icon_url=message.author.avatar_url)
+    await message.channel.send(embed=embed)
 
 @client.event
 async def on_guild_join(guild):
