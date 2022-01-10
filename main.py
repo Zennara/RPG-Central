@@ -70,17 +70,6 @@ colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
 additives = ["-2","-1","+0","+1","+2"]
 additiveChances = [5,15,50,15,5]
 
-#get webhook
-async def getWebhook(channel):
-  hooks = await channel.webhooks()
-  if hooks:
-    x=0
-    for hook in hooks:
-      if hook.token != None:
-        return hooks[x]
-      x += 1
-  return await channel.create_webhook(name="RPGCentral Required",avatar=None,reason="For the RPG Central commands.")
-
 @client.event
 async def on_message(message):
   #check for bots
@@ -136,14 +125,20 @@ async def on_message(message):
   #generate item manually
   if messagecontent == prefix+"gen":
     adj = adjectives[random.randint(0,len(adjectives)-1)]
-    item = items[random.randint(0,len(items)-1)]
-
+    itm = items[random.randint(0,len(items)-1)]
+    item=""
+    emoji=""
+    for i in itm:
+      if i.isalpha() or i == " ":
+        item = item+i
+      else:
+        emoji = emoji + i
     rarity = random.choices(rarities,chances)[0]
     color = colors[rarities.index(rarity)]
 
     addition = random.choices(additives,additiveChances)[0]
     
-    desc = "**["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+    desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
     #send message
     embed = discord.Embed(description=desc, color=color)
     await message.channel.send(embed=embed)
@@ -165,11 +160,18 @@ async def on_message(message):
       reaction, user = await client.wait_for('reaction_add', check=check)
   
       adj = adjectives[random.randint(0,len(adjectives)-1)]
-      item = items[random.randint(0,len(items)-1)]
+      itm = items[random.randint(0,len(items)-1)]
+      item=""
+      emoji=""
+      for i in itm:
+        if i.isalpha() or i == " ":
+          item = item+i
+        else:
+          emoji = emoji + i
       rarity = random.choices(rarities,chances)[0]
       color = colors[rarities.index(rarity)]
       addition = random.choices(additives,additiveChances)[0]
-      desc = "**["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+      desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
       embed = discord.Embed(description=desc, color=color) 
       embed.set_author(name=user.name+" Opened:", icon_url=user.avatar_url)
       await msg.edit(embed=embed)
@@ -181,7 +183,7 @@ async def on_message(message):
         db["players"][str(user.id)][str(message.guild.id)] = []
   
       #give item
-      fullItem = rarity+"|"+adj+"|"+item+"|"+addition
+      fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
 
   #view bag
@@ -197,7 +199,7 @@ async def on_message(message):
           sections = item.split("|")
           if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
             continue
-          texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[0])]+" **["+sections[0]+"]** "+sections[1]+" "+sections[2]+" "+sections[3]) + "\n"
+          texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
     if texts.strip() == "":
       texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
     #webhook = await getWebhook(message.channel)
