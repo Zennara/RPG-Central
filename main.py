@@ -64,6 +64,7 @@ def checkPerms(message):
     asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
 
 #chances, from common to legendary, left to right
+#must be in order from least to most rare
 chances = [50,25,12,6,3]
 rarities = ["Common","Uncommon","Rare","Epic","Legendary"]
 colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
@@ -207,6 +208,59 @@ async def on_message(message):
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
     embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
     await message.channel.send(embed=embed)
+
+  #delete item
+  if messagecontent.startswith(prefix+"delete"):
+    splits = messagecontent.split()
+    if len(splits) == 2:
+      if splits[1].isnumeric():
+        id = int(splits[1])
+        if str(message.author.id) in db["players"]:
+          count = 0
+          count2 = 0
+          for guild in db["players"][str(message.author.id)]:
+            count2 = 0
+            for item in db["players"][str(message.author.id)][guild]:
+              count += 1
+              count2 += 1
+              if id == count:
+                deletedItem = db["players"][str(message.author.id)][guild][count2-1].replace("|"," ")
+                embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to delete\n"+deletedItem)
+                msg = await message.channel.send(embed=embed)
+                done = False
+                def checkR(reaction, user):
+                  if not user.bot and user.id == message.author.id:
+                    if reaction.message == msg:
+                      if str(reaction.emoji) == "✅":
+                        asyncio.create_task(reaction.message.clear_reactions())
+                        return True
+                      elif str(reaction.emoji) == "❌":
+                        asyncio.create_task(reaction.message.clear_reactions())
+                        return True
+                await msg.add_reaction("✅")
+                await msg.add_reaction("⚫")
+                await msg.add_reaction("❌")
+                while True:
+                  reaction, user = await client.wait_for('reaction_add', check=checkR)
+                  if str(reaction.emoji) == "✅":
+                    break
+                  if str(reaction.emoji) == "❌":
+                    done = True
+                    break
+                if not done:
+                  del db["players"][str(message.author.id)][guild][count2-1]
+                  embed = discord.Embed(description="🗑️ Item was deleted.\n"+deletedItem,color=0x00FF00)
+                  await msg.edit(embed=embed)
+                else:
+                  embed = discord.Embed(description="Deletion cancelled.",color=0x00FF00)
+                  await msg.edit(embed=embed)
+                break
+        else:
+          await error(message, "Item does not exist.")
+      else:
+        await error(message, "ID must be numeric.")
+    else:
+      await error(message, "Please specify the item ID.")
 
 @client.event
 async def on_guild_join(guild):
