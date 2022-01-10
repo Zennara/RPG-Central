@@ -10,6 +10,7 @@ import asyncio #not needed unless creating loop tasks etc (you'll run into it)
 import json #to write db to a json file
 import requests #to check discord api for limits/bans
 from replit import db #database storage
+import random
 
 #api limit checker
 #rate limits occur when you access the api too much. You can view Discord.py's api below. There it will tell you whether an action will access the api.
@@ -28,7 +29,19 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
   print("\nYOUR_BOT_NAME Ready.\n")
-  await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="with some code."))
+  await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="intense d&d"))
+
+async def error(message, code):
+  embed = discord.Embed(color=0xff0000, description=code)
+  #if random.randint(1,3) == 1:
+  #  embed.add_field(name="᲼",value="\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
+  await message.channel.send(embed=embed)
+
+def checkPerms(message):
+  if message.author.guild_permissions.manage_guild:
+    return True
+  else:
+    asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
 
 @client.event
 async def on_message(message):
@@ -40,9 +53,9 @@ async def on_message(message):
   messagecontent = message.content.lower()
 
   #this will clear the database if something is broken, WARNING: will delete all entries
-  if messagecontent == "z/clear":
+  if messagecontent == "!clear":
     #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
-    db[str(message.guild.id)] = {"prefix": "z/"}
+    db[str(message.guild.id)] = {"prefix": "!"}
 
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
@@ -59,14 +72,25 @@ async def on_message(message):
     with open("database.json", 'w') as f:
       json.dump(str(data2), f)
 
-  #write your commands below!
-  #example command:
-    if messagecontent == prefix+"ping":
-      await message.channel.send("pong")
+  #change prefix
+  if messagecontent.startswith(prefix + "prefix"):
+    if checkPerms(message):
+      if not any(x in messagecontent for x in ["!","`","<",">","@","&"]):
+        if len(messagecontent) <= len(prefix) + 10:
+          db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
+          embed = discord.Embed(color=0x00FF00, description ="Prefix is now `" + message.content.split()[1:][0] + "`")
+          embed.set_author(name="Prefix Change")
+          #if rand:
+          #  embed.add_field(name="᲼",value="\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
+          await message.channel.send(embed=embed)
+        else:
+          await error(message, "Prefix must be between `1` and `3` characters.")
+      else:
+        await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@`")
 
 @client.event
 async def on_guild_join(guild):
-  db[str(guild.id)] = {"prefix": "i/"} #for database support
+  db[str(guild.id)] = {"prefix": "!"} #for database support
 
 
 keep_alive.keep_alive() 
