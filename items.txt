@@ -1,0 +1,10 @@
+Sword
+Shield
+Skull
+Wand
+Staff
+Greaves
+Shirt
+Stick
+Mace
+Torch

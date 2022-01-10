@@ -1,4 +1,4 @@
-#Discord.py Bot Template, by Zennara#8377
+  #Discord.py Bot Template, by Zennara#8377
 #This template is a compilation of code to make it easier to design your own Discord.py Bot
 #I made this for my own use, but don't care who uses it, but please credit me if someone asks :)
 
@@ -26,10 +26,24 @@ intents = discord.Intents.all() #declare what Intents you use, these will be che
 client = discord.Client(intents=intents)
 
 
+#declare file lists
+adjectives = []
+items = []
+
 @client.event
 async def on_ready():
-  print("\nYOUR_BOT_NAME Ready.\n")
+  print("\nRPG Central Ready.\n")
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="intense d&d"))
+  #adjectives
+  with open("adjectives.txt") as file:
+    adj = file.readlines()
+    global adjectives
+    adjectives = [line.rstrip() for line in adj]
+  #items
+  with open("items.txt") as file:
+    itm = file.readlines()
+    global items
+    items = [line.rstrip() for line in itm]
 
 async def error(message, code):
   embed = discord.Embed(color=0xff0000, description=code)
@@ -42,6 +56,13 @@ def checkPerms(message):
     return True
   else:
     asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
+
+#chances, from common to legendary, left to right
+chances = [50,25,12,6,3]
+rarities = ["Common","Uncommon","Rare","Epic","Legendary"]
+colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
+additives = ["-2","-1","+0","+1","+2"]
+additiveChances = [5,15,50,15,5]
 
 @client.event
 async def on_message(message):
@@ -87,6 +108,21 @@ async def on_message(message):
           await error(message, "Prefix must be between `1` and `3` characters.")
       else:
         await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@`")
+
+  #generate item manually
+  if messagecontent == prefix+"gen":
+    adj = adjectives[random.randint(0,len(adjectives)-1)]
+    item = items[random.randint(0,len(items)-1)]
+
+    rarity = random.choices(rarities,chances)[0]
+    color = colors[rarities.index(rarity)]
+
+    addition = random.choices(additives,additiveChances)[0]
+    
+    desc = "**["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+    #send message
+    embed = discord.Embed(description=desc, color=color)
+    await message.channel.send(embed=embed)
 
 @client.event
 async def on_guild_join(guild):

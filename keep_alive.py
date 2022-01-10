@@ -7,7 +7,7 @@ app = Flask('')
 #Route
 @app.route('/')
 def main():
-    return "YOUR_BOT Online."
+    return "RPG Central Online."
 
 #run https requests
 def run():
