@@ -98,6 +98,9 @@ async def on_message(message):
     db[str(message.guild.id)] = {"prefix": "!"}
     db["players"] = {}
 
+  if messagecontent == "!server":
+    db[str(message.guild.id)] = {"prefix": "!"}
+
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
 
@@ -184,22 +187,22 @@ async def on_message(message):
   emojis = ['⚪','🟢','🔵','🟣','🟡']
   texts = ""
   count = 0
-  if messagecontent.startswith(prefix+"localbag") or messagecontent.startswith(prefix+"bag") or messagecontent.startswith(prefix+"globalbag"):
+  if messagecontent.startswith(prefix+"pocket") or messagecontent.startswith(prefix+"bag"):
     #check if in database
     if str(message.author.id) in db["players"]:
       for guild in db["players"][str(message.author.id)]:
         for item in db["players"][str(message.author.id)][guild]:
           count +=1
           sections = item.split("|")
-          if messagecontent.startswith(prefix+"localbag") and int(guild) != message.guild.id:
-            break
+          if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
+            continue
           texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[0])]+" **["+sections[0]+"]** "+sections[1]+" "+sections[2]+" "+sections[3]) + "\n"
-    else:
-      texts = "Your bag is offly empty."
+    if texts.strip() == "":
+      texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
     #webhook = await getWebhook(message.channel)
     embed = discord.Embed(description=texts, color=0xFFFFFF)
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
-    embed.set_author(name="Global Bag", icon_url=message.author.avatar_url)
+    embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
     await message.channel.send(embed=embed)
 
 @client.event
