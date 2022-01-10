@@ -81,8 +81,11 @@ async def on_message(message):
 
   #this will clear the database if something is broken, WARNING: will delete all entries
   if messagecontent == "!clear":
+    for key in db.keys():
+      del db[key]
     #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
     db[str(message.guild.id)] = {"prefix": "!"}
+    db["players"] = {}
 
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
@@ -132,28 +135,39 @@ async def on_message(message):
 
   #chest manually
   if messagecontent == prefix+"chest":
-    encounter = encounters[random.randint(0,len(encounters)-1)]
-    embed = discord.Embed(description="React to open!",color=0xFF0000)
-    embed.set_author(name=encounter,icon_url="https://cdn.discordapp.com/attachments/929182726203002920/929966082318536764/chestRed.png")
-    msg = await message.channel.send(embed=embed)
-    await msg.add_reaction("💎")
-
-    def check(reaction, user):
-      if reaction.message==msg and str(reaction.emoji)=="💎" and not user.bot:
-        asyncio.create_task(reaction.message.clear_reactions()) 
-        return True
-        
-    reaction, user = await client.wait_for('reaction_add', check=check)
-
-    adj = adjectives[random.randint(0,len(adjectives)-1)]
-    item = items[random.randint(0,len(items)-1)]
-    rarity = random.choices(rarities,chances)[0]
-    color = colors[rarities.index(rarity)]
-    addition = random.choices(additives,additiveChances)[0]
-    desc = "**["+ rarity +"]** "+ adj +" "+ item +" "+ addition
-    embed = discord.Embed(description=desc, color=color) 
-    embed.set_author(name=user.name+" Opened:", icon_url=user.avatar_url)
-    await msg.edit(embed=embed)
+    if checkPerms(message):
+      encounter = encounters[random.randint(0,len(encounters)-1)]
+      embed = discord.Embed(description="React to open!",color=0xFF0000)
+      embed.set_author(name=encounter,icon_url="https://cdn.discordapp.com/attachments/929182726203002920/929966082318536764/chestRed.png")
+      msg = await message.channel.send(embed=embed)
+      await msg.add_reaction("💎")
+  
+      def check(reaction, user):
+        if reaction.message==msg and str(reaction.emoji)=="💎" and not user.bot:
+          asyncio.create_task(reaction.message.clear_reactions()) 
+          return True
+          
+      reaction, user = await client.wait_for('reaction_add', check=check)
+  
+      adj = adjectives[random.randint(0,len(adjectives)-1)]
+      item = items[random.randint(0,len(items)-1)]
+      rarity = random.choices(rarities,chances)[0]
+      color = colors[rarities.index(rarity)]
+      addition = random.choices(additives,additiveChances)[0]
+      desc = "**["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+      embed = discord.Embed(description=desc, color=color) 
+      embed.set_author(name=user.name+" Opened:", icon_url=user.avatar_url)
+      await msg.edit(embed=embed)
+  
+      #find user in db
+      if str(user.id) not in db["players"]:
+        db["players"][str(user.id)] = {}
+      if str(message.guild.id) not in db["players"][str(user.id)]:
+        db["players"][str(user.id)][str(message.guild.id)] = []
+  
+      #give item
+      fullItem = rarity+"|"+adj+"|"+item+"|"+addition
+      db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
 
 @client.event
 async def on_guild_join(guild):
