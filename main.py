@@ -90,6 +90,10 @@ async def on_message(message):
   #convert the message to all lowercase
   messagecontent = message.content.lower()
 
+  #check if in server
+  if str(message.guild.id) not in db:
+    db[str(message.guild.id)] = {"prefix": "!"}
+
   #this will clear the database if something is broken, WARNING: will delete all entries
   if messagecontent == "!clear":
     for key in db.keys():
