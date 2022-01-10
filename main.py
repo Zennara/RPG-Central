@@ -102,9 +102,6 @@ async def on_message(message):
     db[str(message.guild.id)] = {"prefix": "!"}
     db["players"] = {}
 
-  if messagecontent == "!server":
-    db[str(message.guild.id)] = {"prefix": "!"}
-
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
 
