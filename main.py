@@ -67,12 +67,13 @@ def getItem(player, id):
   count = 0
   count2 = 0
   for guild in db["players"][str(player)]:
-    count2 = 0
-    for item in db["players"][str(player)][guild]:
-      count += 1
-      count2 += 1
-      if id == count:
-        return guild, count2
+    if guild != "scrap":
+      count2 = 0
+      for item in db["players"][str(player)][guild]:
+        count += 1
+        count2 += 1
+        if id == count:
+          return guild, count2
   return False, False
 
 #chances, from common to legendary, left to right
@@ -83,6 +84,7 @@ colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
 additives = ["-2","-1","+0","+1","+2"]
 additiveChances = [5,15,50,15,5]
 emojis = ['⚪','🟢','🔵','🟣','🟡']
+scrapEmoji = "🔩"
 
 @client.event
 async def on_message(message):
@@ -193,6 +195,7 @@ async def on_message(message):
       #find user in db
       if str(user.id) not in db["players"]:
         db["players"][str(user.id)] = {}
+        db["players"][str(user.id)]["scrap"] = 0
       if str(message.guild.id) not in db["players"][str(user.id)]:
         db["players"][str(user.id)][str(message.guild.id)] = []
   
@@ -207,15 +210,18 @@ async def on_message(message):
     #check if in database
     if str(message.author.id) in db["players"]:
       for guild in db["players"][str(message.author.id)]:
-        for item in db["players"][str(message.author.id)][guild]:
-          count +=1
-          sections = item.split("|")
-          if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
-            continue
-          texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
+        if guild != "scrap":
+          for item in db["players"][str(message.author.id)][guild]:
+            count +=1
+            sections = item.split("|")
+            if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
+              continue
+            texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
     if texts.strip() == "":
       texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
     #webhook = await getWebhook(message.channel)
+    #add scrap
+    texts = scrapEmoji + " **Scrap:** " +"\n\n"+ texts
     embed = discord.Embed(description=texts, color=0xFFFFFF)
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
     embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
@@ -284,6 +290,7 @@ async def on_message(message):
               del db["players"][str(message.author.id)][guild1][count1-1]
               if str(mbr.id) not in db["players"]:
                 db["players"][str(mbr.id)] = {}
+                db["players"][str(mbr.id)]["scrap"] = 0
               if guild1 not in db["players"][str(mbr.id)]:
                 db["players"][str(mbr.id)][guild1] = []
               db["players"][str(mbr.id)][guild1].append(item)

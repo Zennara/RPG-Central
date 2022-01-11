@@ -101,7 +101,7 @@
 🍵Green Tea
 🍶Sake
 🍾Champagne
-🍷Wi
+🍷
 🍸Cocktail
 🍹Tropical Drink
 🍺Beer
@@ -284,7 +284,7 @@
 🏒Hockey Stick
 🏓Paddle
 🏸Racket
-🥊Boxing Ge
+🥊Boxine
 🥋Gi
 🥅Net
 ⛸️Ice Skate
@@ -431,7 +431,8 @@
 🗜️Clamp
 ⚖️Scale
 🦯Cane
-⛓️Chain
+⛓️
+🪵LogChain
 🪝Hook
 🧰Toolbox
 🧲Magnet
