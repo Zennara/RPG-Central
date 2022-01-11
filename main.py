@@ -84,7 +84,7 @@ rarities = ["Common","Uncommon","Rare","Epic","Legendary"]
 colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
 emojis = ['⚪','🟢','🔵','🟣','🟡']
 
-additives = ["0","1","2","3","4"]
+additives = ["+0","+1","+2","+3","+4"]
 additiveChances = [50,25,12,6,3]
 
 scrapEmoji = "🔩"
@@ -211,9 +211,11 @@ async def on_message(message):
   #view bag
   texts = ""
   count = 0
+  scrapAmount = "0"
   if messagecontent.startswith(prefix+"pocket") or messagecontent.startswith(prefix+"bag"):
     #check if in database
     if str(message.author.id) in db["players"]:
+      scrapAmount = str(db["players"][str(message.author.id)]["scrap"])
       for guild in db["players"][str(message.author.id)]:
         if guild != "scrap":
           for item in db["players"][str(message.author.id)][guild]:
@@ -226,7 +228,7 @@ async def on_message(message):
       texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
     #webhook = await getWebhook(message.channel)
     #add scrap
-    texts = scrapEmoji + " **Scrap:** "+ str(db["players"][str(message.author.id)]["scrap"]) +"\n\n"+ texts
+    texts = scrapEmoji + " **Scrap:** "+ scrapAmount +"\n\n"+ texts
     embed = discord.Embed(description=texts, color=0xFFFFFF)
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
     embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
