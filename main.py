@@ -425,70 +425,73 @@ async def on_message(message):
       if splits[1].isnumeric():
         if message.guild.get_member(int(splits[1])):
           tradee = message.guild.get_member(int(splits[1]))
-          embed = discord.Embed(description="-----------------------------------")
-          embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-          embed.set_footer(text=tradee.name, icon_url=tradee.avatar_url)
-          embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
-          msg = await message.channel.send(embed=embed)
-          await msg.add_reaction("✅")
-          await msg.add_reaction("⚫")
-          await msg.add_reaction("❌")
-          done = False
-          traderAgree = False
-          tradeeAgree = False
-          def checkR(reaction, user):
-            if not user.bot:
-              if reaction.message == msg:
-                if str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌":
-                  if user.id == message.author.id or user.id == tradee.id:
-                    asyncio.create_task(reaction.remove(user))
-                    return True
-
-          user2 = ""
-          while True:
-            reaction, user = await client.wait_for('reaction_add', check=checkR)
-            
-            if str(reaction.emoji) == "✅":
-              if user.id == message.author.id:
-                if not traderAgree:
-                  traderAgree = True
-              elif user.id == tradee.id:
-                if not tradeeAgree:
-                  tradeeAgree = True
-            elif str(reaction.emoji) == "❌":
-              if user.id == message.author.id:
-                if traderAgree == False:
-                  done = False
-                  user2 = user
-                  break
-                traderAgree = False
-              elif user.id == tradee.id:
-                if tradeeAgree == False:
-                  done = False
-                  user2 = user
-                  break
-                tradeeAgree = False
-
+          if tradee.id != message.author.id:
             embed = discord.Embed(description="-----------------------------------")
-            embed.set_author(name=message.author.name+(" -- [✅ Agreed]" if traderAgree else ""), icon_url=message.author.avatar_url)
-            embed.set_footer(text=tradee.name+(" -- [✅ Agreed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
+            embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+            embed.set_footer(text=tradee.name, icon_url=tradee.avatar_url)
             embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
-            await msg.edit(embed=embed)
+            msg = await message.channel.send(embed=embed)
+            await msg.add_reaction("✅")
+            await msg.add_reaction("⚫")
+            await msg.add_reaction("❌")
+            done = False
+            traderAgree = False
+            tradeeAgree = False
+            def checkR(reaction, user):
+              if not user.bot:
+                if reaction.message == msg:
+                  if str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌":
+                    if user.id == message.author.id or user.id == tradee.id:
+                      asyncio.create_task(reaction.remove(user))
+                      return True
+  
+            user2 = ""
+            while True:
+              reaction, user = await client.wait_for('reaction_add', check=checkR)
               
-            if traderAgree and tradeeAgree:
-              done = True
-              break
-         
-          if done:
-            await msg.clear_reactions()
-            print("confirmed")
+              if str(reaction.emoji) == "✅":
+                if user.id == message.author.id:
+                  if not traderAgree:
+                    traderAgree = True
+                elif user.id == tradee.id:
+                  if not tradeeAgree:
+                    tradeeAgree = True
+              elif str(reaction.emoji) == "❌":
+                if user.id == message.author.id:
+                  if traderAgree == False:
+                    done = False
+                    user2 = user
+                    break
+                  traderAgree = False
+                elif user.id == tradee.id:
+                  if tradeeAgree == False:
+                    done = False
+                    user2 = user
+                    break
+                  tradeeAgree = False
+  
+              embed = discord.Embed(description="-----------------------------------")
+              embed.set_author(name=message.author.name+(" -- [✅ Agreed]" if traderAgree else ""), icon_url=message.author.avatar_url)
+              embed.set_footer(text=tradee.name+(" -- [✅ Agreed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
+              embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
+              await msg.edit(embed=embed)
+                
+              if traderAgree and tradeeAgree:
+                done = True
+                break
+           
+            if done:
+              await msg.clear_reactions()
+              print("confirmed")
+            else:
+              await msg.clear_reactions()
+              embed = discord.Embed(description="-----------------------------------")
+              embed.set_author(name=message.author.name+(" -- [🚫 Cancelled]" if user2.id==message.author.id else ""), icon_url=message.author.avatar_url)
+              embed.set_footer(text=tradee.name+(" -- [🚫 Cancelled]" if user2.id==tradee.id else ""), icon_url=tradee.avatar_url)
+              embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930394152309510184/images-removebg-preview.png")
+              await msg.edit(embed=embed)
           else:
-            await msg.clear_reactions()
-            embed = discord.Embed(description="-----------------------------------")
-            embed.set_author(name=message.author.name+(" -- [🚫 Cancelled]" if user2.id==message.author.id else ""), icon_url=message.author.avatar_url)
-            embed.set_footer(text=tradee.name+(" -- [🚫 Cancelled]" if user2.id==tradee.id else ""), icon_url=tradee.avatar_url)
-            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930394152309510184/images-removebg-preview.png")
-            await msg.edit(embed=embed)
+            await error(message, "You can not trade with yourself.")
         else:
           await error(message, "Member does not exist.")
       else:
