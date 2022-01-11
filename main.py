@@ -80,11 +80,16 @@ def getItem(player, id):
 #must be in order from least to most rare
 chances = [50,25,12,6,3]
 rarities = ["Common","Uncommon","Rare","Epic","Legendary"]
+
 colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
-additives = ["-2","-1","+0","+1","+2"]
-additiveChances = [5,15,50,15,5]
 emojis = ['⚪','🟢','🔵','🟣','🟡']
+
+additives = ["0","1","2","3","4"]
+additiveChances = [50,25,12,6,3]
+
 scrapEmoji = "🔩"
+scrapAmounts = [10,20,30,40,50]
+multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 
 @client.event
 async def on_message(message):
@@ -221,7 +226,7 @@ async def on_message(message):
       texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
     #webhook = await getWebhook(message.channel)
     #add scrap
-    texts = scrapEmoji + " **Scrap:** " +"\n\n"+ texts
+    texts = scrapEmoji + " **Scrap:** "+ str(db["players"][str(message.author.id)]["scrap"]) +"\n\n"+ texts
     embed = discord.Embed(description=texts, color=0xFFFFFF)
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
     embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
@@ -310,6 +315,55 @@ async def on_message(message):
         await error(message, "Item ID must be numeric.")
     else:
       await error(message, "Please specify the item ID and player mention.")
+
+  #scrap item
+  if messagecontent.startswith(prefix+"scrap"):
+    splits = messagecontent.split()
+    if len(splits) == 2:
+      if splits[1].isnumeric():
+        guild1, count1 = getItem(message.author.id, int(splits[1]))
+        if guild1 != False:
+          splits = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+          scrapItem = splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+          scrapAmount = scrapAmounts[rarities.index(splits[1])] * multipliers[int(splits[4].replace("+",""))]
+          print(scrapAmounts[rarities.index(splits[1])])
+          print(multipliers[int(splits[4].replace("+",""))])
+          embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to **scrap** this item for "+ str(scrapAmount) +scrapEmoji +"?\n"+scrapItem)
+          msg = await message.channel.send(embed=embed)
+          done = False
+          def checkR(reaction, user):
+            if not user.bot and user.id == message.author.id:
+              if reaction.message == msg:
+                if str(reaction.emoji) == "✅":
+                  asyncio.create_task(reaction.message.clear_reactions())
+                  return True
+                elif str(reaction.emoji) == "❌":
+                  asyncio.create_task(reaction.message.clear_reactions())
+                  return True
+          await msg.add_reaction("✅")
+          await msg.add_reaction("⚫")
+          await msg.add_reaction("❌")
+          while True:
+            reaction, user = await client.wait_for('reaction_add', check=checkR)
+            if str(reaction.emoji) == "✅":
+              break
+            if str(reaction.emoji) == "❌":
+              done = True
+              break
+          if not done:
+            del db["players"][str(message.author.id)][guild1][count1-1]
+            db["players"][str(message.author.id)]["scrap"] += scrapAmount
+            embed = discord.Embed(description="⚙️ Item was scrapped for "+ str(scrapAmount) +scrapEmoji+"\n"+scrapItem,color=0x00FF00)
+            await msg.edit(embed=embed)
+          else:
+            embed = discord.Embed(description="Scrap cancelled.",color=0x00FF00)
+            await msg.edit(embed=embed)
+        else:
+          await error(message, "Item does not exist.")
+      else:
+        await error(message, "Item ID must be numeric.")
+    else:
+      await error(message, "Please specify the item ID.")
 
 @client.event
 async def on_guild_join(guild):
