@@ -318,6 +318,47 @@ async def on_message(message):
     else:
       await error(message, "Please specify the item ID and player mention.")
 
+  #pay scrap
+  if messagecontent.startswith(prefix+"pay"):
+    splits = messagecontent.split()
+    if len(splits) == 3:
+      splits[1] = splits[1].replace("<","").replace(">","").replace("@","").replace("!","")
+      if splits[1].isnumeric():
+        if message.guild.get_member(int(splits[1])):
+          mbr = message.guild.get_member(int(splits[1]))
+          if splits[2].isnumeric():
+            amount = int(splits[2])
+            if amount > 0:
+              if str(message.author.id) in db["players"]:
+                scrap = db["players"][str(message.author.id)]["scrap"]
+                if scrap >= amount:
+                  if splits[1] not in db["players"]:
+                    db["players"][str(mbr.id)] = {}
+                    db["players"][str(mbr.id)]["scrap"] = 0
+                  #gave amount to user
+                  db["players"][str(mbr.id)]["scrap"] = amount
+                  #subtract amount
+                  db["players"][str(message.author.id)]["scrap"] = scrap - amount
+                  #confirmation message
+                  embed = discord.Embed(description="gave **"+str(amount)+"** "+scrapEmoji + " to:")
+                  embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                  embed.set_footer(text=mbr.name,icon_url=mbr.avatar_url)
+                  await message.channel.send(embed=embed)
+                else:
+                  await error(message, "You only have "+str(scrap)+scrapEmoji)
+              else:
+                await error(message, "You do not have any scrap.")
+            else:
+              await error(message, "Please enter an amount above `0`")
+          else:
+            await error(message, "Scrap amount should be numeric")
+        else:
+          await error(message, "Invalid player mention or ID")
+      else:
+        await error(message, "Player should be mention or their ID")
+    else:
+      await error(message, "Please input the amount to pay and the member mention.")
+
   #scrap item
   if messagecontent.startswith(prefix+"scrap"):
     splits = messagecontent.split()
