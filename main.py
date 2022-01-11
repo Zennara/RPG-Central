@@ -130,7 +130,7 @@ async def on_message(message):
   #change prefix
   if messagecontent.startswith(prefix + "prefix"):
     if checkPerms(message):
-      if not any(x in messagecontent for x in ["`",">","@","*","~","_"]):
+      if not any(x in messagecontent for x in ["`",">","@","*","~","_"," "]):
         if len(messagecontent) <= len(prefix) + 10:
           db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
           embed = discord.Embed(color=0x00FF00, description ="Prefix is now `" + message.content.split()[1:][0] + "`")
@@ -141,7 +141,7 @@ async def on_message(message):
         else:
           await error(message, "Prefix must be between `1` and `3` characters.")
       else:
-        await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@`")
+        await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@` , ` `")
 
   #generate item manually
   if messagecontent == prefix+"gen":
