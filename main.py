@@ -288,7 +288,7 @@ async def on_message(message):
                 db["players"][str(mbr.id)][guild1] = []
               db["players"][str(mbr.id)][guild1].append(item)
               splits = item.split("|")
-              item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3]
+              item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
               embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
               embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
               embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
