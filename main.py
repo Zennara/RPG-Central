@@ -336,7 +336,7 @@ async def on_message(message):
                     db["players"][str(mbr.id)] = {}
                     db["players"][str(mbr.id)]["scrap"] = 0
                   #gave amount to user
-                  db["players"][str(mbr.id)]["scrap"] = amount
+                  db["players"][str(mbr.id)]["scrap"] = db["players"][str(mbr.id)]["scrap"] + amount
                   #subtract amount
                   db["players"][str(message.author.id)]["scrap"] = scrap - amount
                   #confirmation message
