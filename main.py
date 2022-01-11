@@ -433,7 +433,7 @@ async def on_message(message):
     scrap = 0
     if str(message.author.id) in db["players"]:
       scrap = db["players"][str(message.author.id)]["scrap"]
-    embed2 = discord.Embed(description="Welcome to the shop.")
+    embed2 = discord.Embed(description="Welcome to the shop.\n-------------------------")
     embed2.set_author(name="🛒 Marketplace")
 
     #items
