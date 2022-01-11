@@ -237,7 +237,7 @@ async def on_message(message):
           guild1, count1 = getItem(message.author.id, id)
           if guild1 != False:
             deletedItem = db["players"][str(message.author.id)][guild1][count1-1].replace("|"," ")
-            embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to delete\n"+deletedItem)
+            embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to delete this item?\n"+deletedItem)
             msg = await message.channel.send(embed=embed)
             done = False
             def checkR(reaction, user):
