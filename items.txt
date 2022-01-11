@@ -1,10 +1,477 @@
-⚔️Sword
-🛡️Shield
-💀Skull
+🍇Grapes
+🍈Melon
+🍉Watermelon
+🍊Tangerine
+🍋Lemon
+🍌Banana
+🍍Pineapple
+🥭Mango
+🍎Red Apple
+🍐Pear
+🍑Peach
+🍒Cherries
+🍓Strawberry
+🫐Blueberries
+🥝Kiwi
+🍅Tomato
+🫒Olive
+🥥Coconut
+🥑Avocado
+🍆Eggplant
+🥔Potato
+🥕Carrot
+🌽Corn
+🌶️Chili
+🫑Pepper
+🥒Cucumber
+🥬Spinach
+🥦Broccoli
+🧄Garlic
+🧅Onion
+🍄Mushroom
+🥜Peanut
+🌰Chestnut
+🍞Bread
+🥐Croissant
+🥖Baguette
+🫓Flatbread
+🥨Pretzel
+🥯Bagel
+🥞Pancakes
+🧇Waffle
+🧀Cheese
+🍖Meat
+🍗Drumstick
+🥩Steak
+🥓Bacon
+🍔Hamburger
+🍟Fries
+🍕Pizza
+🌭Hot Dog
+🥪Sandwich
+🌮Taco
+🌯Burrito
+🫔Tamale
+🥙Flatbread
+🧆Falafel
+🥚Egg
+🍳Cooking
+🥘Soup
+🫕Fondue
+🥣Bowl
+🥗Salad
+🍿Popcorn
+🧈Butter
+🧂Salt
+🥫Can
+🍱Bent
+🍙Onigiri
+🍚Rice
+🍛Curry
+🍜Ramen
+🍝Spaghetti
+🍠Yam
+🍢Oden
+🍣Sushi
+🍤Fried Shrimp
+🍥Fishcake
+🍡Dango
+🥟Dumpling
+🥠Fortune Cookie
+🥡Takeout
+🦪Oyster
+🍦Soft Serve
+🍧Shaved Ice
+🍨Ice Cream
+🍩Doughnut
+🍪Cookie
+🎂Cake
+🍰Slice of Cake
+🧁Cupcake
+🥧Pie
+🍫Chocolate Bar
+🍬Candy
+🍭Lollipop
+🍮Custard
+🍯Honey Pot
+🍼Bottle
+🥛Milk
+☕Coffee
+🫖Teapot
+🍵Green Tea
+🍶Sake
+🍾Champagne
+🍷Wi
+🍸Cocktail
+🍹Tropical Drink
+🍺Beer
+🥃Whiskey
+🥤Drink
+🧃Juice
+🧊Ice
+🥢Chopsticks
+🍴Silverware
+🥄Spoon
+
+
+💦Droplets
+🐒Monkey
+🦍Gorilla
+🦧Orangutan
+🐕Dog
+🐩Poodle
+🐺Wolf
+🦊Fox
+🦝Raccoon
+🐈Cat
+🐈‍⬛Carbuncle
+🦁Lion
+🐅Tiger
+🐆Leopard
+🐎Horse
+🦄Unicorn
+🦓Zebra
+🦌Deer
+🦬Bison
+🐂Ox
+🐃Buffalo
+🐄Cow
+🐖Pig
+🐗Boar
+🐏Ram
+🐑Ewe
+🐐Goat
+🐫Camel
+🦙Llama
+🦒Giraffe
+🐘Elephant
+🦣Mammoth
+🦏Rhinoceros
+🦛Hippopotamus
+🐁Mouse
+🐀Rat
+🐹Hamster
+🐇Rabbit
+🐿️Chipmunk
+🦫Beaver
+🦔Hedgehog
+🦇Bat
+🐻Bear
+🐻‍❄️Polar Bear
+🐨Koala
+🐼Panda
+🦥Sloth
+🦦Otter
+🦨Skunk
+🦘Kangaroo
+🦡Badger
+🐾Pawprint
+🦃Turkey
+🐔Chicken
+🐓Rooster
+🐣Hatching Chick
+🐤Chick
+🐦Bird
+🐧Penguin
+🕊️Dove
+🦅Eagle
+🦆Duck
+🦢Swan
+🦉Owl
+🦤Dodo
+🪶Feather
+🦩Flamingo
+🦚Peacock
+🦜Parrot
+🐸Frog
+🐊Crocodile
+🐢Turtle
+🦎Lizard
+🐍Snake
+🐉Dragon
+🦕Sauropod
+🦖Dinosaur
+🐳Whale
+🐬Dolphin
+🦭Seal
+🐟Fish
+🐠Tropical Fish
+🐡Blowfish
+🦈Shark
+🐙Octopus
+🐚Conch
+🐌Snail
+🦋Butterfly
+🐛Bug
+🐜Ant
+🐝Bee
+🪲Beetle
+🐞Ladybug
+🦗Cricket
+🪳Cockroach
+🕷️Spider
+🕸️Web
+🦂Scorpion
+🦟Mosquito
+🪰Fly
+🪱Worm
+🦠Amoeba
+💐Bouquet
+🌸Blossom
+🌹Rose
+🥀Wilted Flower
+🌺Hibiscus
+🌻Sunflower
+🌼Blossom
+🌷Tulip
+🌱Seedling
+🪴Potted Plant
+🌲Evergreen
+🌳Tree
+🌴Palm
+🌵Cactus
+🌾Rice
+🌿Herb
+🍀FourLeafClover
+🍁Maple Leaf
+🍂Dead Leaf
+🍃Leaf
+🍄Mushroom
+🌰Chestnut
+🦀Crab
+🦞Lobster
+🦐Shrimp
+🦑Squid
+🌍Planet
+🪨Rock
+🌙Moon
+☀️Sun
+⭐Star
+🌠Shooting Star
+☁️Cloud
+⛈️Thundercloud
+🌧️Raincloud
+🌪️Tornado
+🌫️Fog
+🌈Rainbow
+☂️Umbrella
+⚡Spark
+❄️Snowflake
+⛄Snowman
+☄️Comet
+🔥Fire
+💧Droplet
+🌊Wave
+🎄Christmas Tree
+✨Sparkles
+🎪Tent
+🛹Skateboard
+🛼Roller Skates
+🛶Boat
+🎗️Ribbon
+🎟️Tickets
+🏆Trophy
+🏅Medal
+⚽Soccer Ball
+⚾Baseball
+🏀Basketball
+🏐Volleyball
+🏈Football
+🎾Tennis Ball
+🥏Frisbee
+🎳Bowling Ball
+🏏Cricket Bat
+🏒Hockey Stick
+🏓Paddle
+🏸Racket
+🥊Boxing Ge
+🥋Gi
+🥅Net
+⛸️Ice Skate
+🎣Fishing Pole
+🎽Running Shirt
+🎿Skis
+🛷Sled
+🥌Curling Stone
+🎯Target
+🎱Eight Ball
+🎮Controller
+🎲Die
+🧩Puzzle Piece
+♟️Chess Piece
+🎨Palette
+🧵Thread
+🧶Yarn
+🎤Microphone
+🎧Headphones
+🎷Saxophone
+🪗Accordion
+🎸Guitar
+🎹Keyboard
+🎺Trumpet
+🎻Violin
+🥁Drum
+🏹Bow
+
+
+
+💌Love Letter
+🕳️Hole
+💣Bomb
+🔪Knife
+🏺Amphora
+🗺️Map
+🧭Compass
+🧱Brick
+🦽Wheelchair
+🛢️Drum
+🛎️Bell
+🧳Luggage
+⌛Hourglass
+⌚Watch
+⏰Clock
+🌡️Thermometer
+⛱️Umbrella
+🧨Firecracker
+🎈Balloon
+🎉Party Popper
+🎊Confetti Ball
+🎎Doll
+🎏Streamers
+🎐Chime
+🎀Ribbon
+🎁Gift
+🤿Snorkel
+🪀Yo-Yo
+🪁Kite
+🔮Orb
 🪄Wand
-🪄Staff
-🛡️Greaves
-🛡️Shirt
-⚔️Stick
-⚔️Mace
-🪄Torch
+🧿Nazar
+🕹️Joystick
+🧸Teddy Bear
+🪅Pinata
+🪆Nesting Dolls
+🖼️Photo
+🧵Thread
+🪡Needle
+🧶Yarn
+🪢Knot
+🛍️Bags
+📿Prayer Beads
+💎Gem
+📯Horn
+🎙️Microphone
+🎛️Dials
+📻Radio
+🪕Banjo
+📱Smartphone
+☎️Telephone
+📟Pager
+📠Fax Machine
+🔋Battery
+🔌Plug
+💻Laptop
+🖥️Desktop
+🖨️Printer
+⌨️Keyboard
+🖱️Mouse
+💾Floppy Disk
+💿CD
+🧮Abacus
+🎞️Movie
+📺Television
+📷Camera
+📹Video Camera
+📼VHS
+🔍Magnifying Glass
+🕯️Candle
+💡Light Bulb
+🔦Flashlight
+📔Spellbook
+📕Book
+📓Notebook
+📒Ledger
+📜Scroll
+📰Newspaper
+🪙Coin
+💵Bill
+💳Credit Card
+✉️Letter
+📦Box
+📫Mailbox
+✏️Pencil
+🖋️Fountain Pen
+🖊️Pen
+🖌️Brush
+🖍️Crayon
+📅Calendar
+📋Clipboard
+📌Pushpin
+📎Paperclip
+📏Straight Ruler
+📐Triangular Ruler
+✂️Scissors
+🗑️Wastebasket
+🔒Lock
+🔑Key
+🔨Hammer
+🪓Axe
+⛏️Pick
+🛠️Tools
+🗡️Dagger
+⚔️Sword
+🔫Gun
+🪃Boomerang
+🛡️Shield
+🪚Saw
+🔧Wrench
+🪛Screwdriver
+🔩Bolt
+⚙️Gear
+🗜️Clamp
+⚖️Scale
+🦯Cane
+⛓️Chain
+🪝Hook
+🧰Toolbox
+🧲Magnet
+🪜Ladder
+⚗️Alembic
+🧪Test Tube
+🧫Petri Dish
+🧬DNA
+🔬Microscope
+🔭Telescope
+📡Satellite
+💉Syringe
+💊Pill
+🩹Bandage
+🩺Stethoscope
+🚪Door
+🪞Mirror
+🛏️Bed
+🛋️Couch
+🪑Chair
+🚽Toilet
+🪠Plunger
+🚿Shower
+🛁Bathtub
+🪤Trap
+🪒Razor
+🧴Lotion
+🧷Safety Pin
+🧹Broom
+🧺Basket
+🧻Toilet Paper
+🪣Bucket
+🧼Soap
+🪥Toothbrush
+🧽Sponge
+🧯Fire Extinguisher
+🛒Shopping Cart
+🚬Cigarette
+⚰️Coffin
+🪦Headstone
+⚱️Urn
+🗿Moai
+🪧Sign

@@ -1,4 +1,4 @@
-  #Discord.py Bot Template, by Zennara#8377
+#Discord.py Bot Template, by Zennara#8377
 #This template is a compilation of code to make it easier to design your own Discord.py Bot
 #I made this for my own use, but don't care who uses it, but please credit me if someone asks :)
 
@@ -63,6 +63,18 @@ def checkPerms(message):
   else:
     asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
 
+def getItem(player, id):
+  count = 0
+  count2 = 0
+  for guild in db["players"][str(player)]:
+    count2 = 0
+    for item in db["players"][str(player)][guild]:
+      count += 1
+      count2 += 1
+      if id == count:
+        return guild, count2
+  return False, False
+
 #chances, from common to legendary, left to right
 #must be in order from least to most rare
 chances = [50,25,12,6,3]
@@ -70,6 +82,7 @@ rarities = ["Common","Uncommon","Rare","Epic","Legendary"]
 colors = [0x808080,0x00FF00,0x0000FF,0x7851A9,0xFFD700]
 additives = ["-2","-1","+0","+1","+2"]
 additiveChances = [5,15,50,15,5]
+emojis = ['⚪','🟢','🔵','🟣','🟡']
 
 @client.event
 async def on_message(message):
@@ -188,7 +201,6 @@ async def on_message(message):
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
 
   #view bag
-  emojis = ['⚪','🟢','🔵','🟣','🟡']
   texts = ""
   count = 0
   if messagecontent.startswith(prefix+"pocket") or messagecontent.startswith(prefix+"bag"):
@@ -216,51 +228,80 @@ async def on_message(message):
       if splits[1].isnumeric():
         id = int(splits[1])
         if str(message.author.id) in db["players"]:
-          count = 0
-          count2 = 0
-          for guild in db["players"][str(message.author.id)]:
-            count2 = 0
-            for item in db["players"][str(message.author.id)][guild]:
-              count += 1
-              count2 += 1
-              if id == count:
-                deletedItem = db["players"][str(message.author.id)][guild][count2-1].replace("|"," ")
-                embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to delete\n"+deletedItem)
-                msg = await message.channel.send(embed=embed)
-                done = False
-                def checkR(reaction, user):
-                  if not user.bot and user.id == message.author.id:
-                    if reaction.message == msg:
-                      if str(reaction.emoji) == "✅":
-                        asyncio.create_task(reaction.message.clear_reactions())
-                        return True
-                      elif str(reaction.emoji) == "❌":
-                        asyncio.create_task(reaction.message.clear_reactions())
-                        return True
-                await msg.add_reaction("✅")
-                await msg.add_reaction("⚫")
-                await msg.add_reaction("❌")
-                while True:
-                  reaction, user = await client.wait_for('reaction_add', check=checkR)
+          guild1, count1 = getItem(message.author.id, id)
+          if guild1 != False:
+            deletedItem = db["players"][str(message.author.id)][guild1][count1-1].replace("|"," ")
+            embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to delete\n"+deletedItem)
+            msg = await message.channel.send(embed=embed)
+            done = False
+            def checkR(reaction, user):
+              if not user.bot and user.id == message.author.id:
+                if reaction.message == msg:
                   if str(reaction.emoji) == "✅":
-                    break
-                  if str(reaction.emoji) == "❌":
-                    done = True
-                    break
-                if not done:
-                  del db["players"][str(message.author.id)][guild][count2-1]
-                  embed = discord.Embed(description="🗑️ Item was deleted.\n"+deletedItem,color=0x00FF00)
-                  await msg.edit(embed=embed)
-                else:
-                  embed = discord.Embed(description="Deletion cancelled.",color=0x00FF00)
-                  await msg.edit(embed=embed)
+                    asyncio.create_task(reaction.message.clear_reactions())
+                    return True
+                  elif str(reaction.emoji) == "❌":
+                    asyncio.create_task(reaction.message.clear_reactions())
+                    return True
+            await msg.add_reaction("✅")
+            await msg.add_reaction("⚫")
+            await msg.add_reaction("❌")
+            while True:
+              reaction, user = await client.wait_for('reaction_add', check=checkR)
+              if str(reaction.emoji) == "✅":
                 break
+              if str(reaction.emoji) == "❌":
+                done = True
+                break
+            if not done:
+              del db["players"][str(message.author.id)][guild1][count1-1]
+              embed = discord.Embed(description="🗑️ Item was deleted.\n"+deletedItem,color=0x00FF00)
+              await msg.edit(embed=embed)
+            else:
+              embed = discord.Embed(description="Deletion cancelled.",color=0x00FF00)
+              await msg.edit(embed=embed)
+          else:
+            await error(message, "Item does not exist.")
         else:
-          await error(message, "Item does not exist.")
+          await error(message, "You do not have any items.")
       else:
         await error(message, "ID must be numeric.")
     else:
       await error(message, "Please specify the item ID.")
+
+  #give item
+  if messagecontent.startswith(prefix+"give"):
+    splits = messagecontent.split()
+    if len(splits) == 3:
+      if splits[1].isnumeric():
+        mbr = splits[2].replace("<","").replace(">","").replace("@","").replace("!","")
+        if mbr.isnumeric():
+          if message.guild.get_member(int(mbr)):
+            mbr = message.guild.get_member(int(mbr))
+            guild1, count1 = getItem(message.author.id, int(splits[1]))
+            if guild1 != False:
+              item = db["players"][str(message.author.id)][guild1][count1-1]
+              del db["players"][str(message.author.id)][guild1][count1-1]
+              if str(mbr.id) not in db["players"]:
+                db["players"][str(mbr.id)] = {}
+                db["players"][str(mbr.id)][guild1] = []
+              db["players"][str(mbr.id)][guild1].append(item)
+              splits = item.split("|")
+              item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3]
+              embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
+              embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
+              embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
+              await message.channel.send(embed=embed)
+            else:
+              await error(message, "Item does not exist.")
+          else:
+            await error(message, "Member not in the guild.")
+        else:
+          await error(message, "Member must be ID or mention.")
+      else:
+        await error(message, "Item ID must be numeric.")
+    else:
+      await error(message, "Please specify the item ID and player mention.")
 
 @client.event
 async def on_guild_join(guild):
