@@ -314,6 +314,7 @@ async def on_message(message):
 @client.event
 async def on_guild_join(guild):
   db[str(guild.id)] = {"prefix": "!"} #for database support
+  db["players"] = {}
 
 
 keep_alive.keep_alive() 
