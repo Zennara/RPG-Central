@@ -284,6 +284,7 @@ async def on_message(message):
               del db["players"][str(message.author.id)][guild1][count1-1]
               if str(mbr.id) not in db["players"]:
                 db["players"][str(mbr.id)] = {}
+              if guild1 not in db["players"][str(mbr.id)]:
                 db["players"][str(mbr.id)][guild1] = []
               db["players"][str(mbr.id)][guild1].append(item)
               splits = item.split("|")
