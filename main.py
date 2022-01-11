@@ -91,6 +91,23 @@ scrapEmoji = "🔩"
 scrapAmounts = [10,20,30,40,50]
 multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 
+def openChest():
+  adj = adjectives[random.randint(0,len(adjectives)-1)]
+  itm = items[random.randint(0,len(items)-1)]
+  item=""
+  emoji=""
+  for i in itm:
+    if i.isalpha() or i == " ":
+      item = item+i
+    else:
+      emoji = emoji + i
+  rarity = random.choices(rarities,chances)[0]
+  color = colors[rarities.index(rarity)]
+  addition = random.choices(additives,additiveChances)[0]
+  desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+  fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
+  return desc, color, fullItem
+
 @client.event
 async def on_message(message):
   #check for bots
@@ -410,6 +427,73 @@ async def on_message(message):
         await error(message, "Item ID must be numeric.")
     else:
       await error(message, "Please specify the item ID.")
+
+  #market
+  if messagecontent == prefix+"shop":
+    scrap = 0
+    if str(message.author.id) in db["players"]:
+      scrap = db["players"][str(message.author.id)]["scrap"]
+    embed2 = discord.Embed(description="Welcome to the shop.")
+    embed2.set_author(name="🛒 Marketplace")
+
+    #items
+    embed2.add_field(name="1️⃣ Item Chest | "+"15"+scrapEmoji, value="A common chest containing an item.", inline=False)
+    
+    embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
+    msg = await message.channel.send(embed=embed2)
+
+    numbers = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
+    shopAmount = ["1️⃣"]
+    def checkR(reaction, user):
+      if not user.bot and user.id == message.author.id:
+        if reaction.message == msg:
+          if str(reaction.emoji) in shopAmount:
+            asyncio.create_task(reaction.remove(user))
+            return True
+          elif str(reaction.emoji) == "❌":
+            asyncio.create_task(reaction.message.clear_reactions())
+            return True
+
+    boughtItem = ""
+    price = ""
+    items = []
+    prices = []
+    await msg.add_reaction("❌")
+    for x in range(len(msg.embeds[0].fields)):      
+      items.append(" ".join(msg.embeds[0].fields[x].name.split()[1:-2]))
+      prices.append(" ".join(msg.embeds[0].fields[x].name.split()[-1:]))
+      await msg.add_reaction(numbers[x])  
+
+    while True:
+      reaction, user = await client.wait_for('reaction_add', check=checkR)
+      if str(reaction.emoji) in shopAmount:
+        boughtItem = items[numbers.index(str(reaction.emoji))]
+        price = prices[numbers.index(str(reaction.emoji))]
+        if scrap >= int(price[:-1]):
+          db["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-1])
+          
+          desc, color, fullItem = openChest()
+          #find user in db
+          if str(message.author.id) not in db["players"]:
+            db["players"][str(message.author.id)] = {}
+            db["players"][str(message.author.id)]["scrap"] = 0
+          if str(message.guild.id) not in db["players"][str(message.author.id)]:
+            db["players"][str(message.author.id)][str(message.guild.id)] = []
+      
+          #give item
+          db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+          scrap = db["players"][str(message.author.id)]["scrap"]
+          
+          embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price+"\n"+desc,color=color)
+          await message.channel.send(embed=embed)
+          embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
+          await msg.edit(embed=embed2)
+        else:
+          await error(message, "You only have "+str(scrap)+scrapEmoji)
+      if str(reaction.emoji) == "❌":
+        embed = discord.Embed(description="You left the shop.",color=0xFF0000)
+        await msg.edit(embed=embed)
+        break
 
   #additem
   if messagecontent.startswith(prefix+"additem"):
