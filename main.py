@@ -359,9 +359,7 @@ async def on_message(message):
             break
           if guild != "scrap" and guild != "trading":
             if db["players"][str(message.author.id)][guild]:
-              print(page*pageSize - (pageSize+1))
-              print(page*pageSize)
-              if page*pageSize - (pageSize+1) <= count <= page*pageSize:
+              if page*pageSize - (pageSize)  <= count <= page*pageSize:
                 #get invite link
                 link = db[str(guild)]["name"]
                 try:
@@ -390,7 +388,7 @@ async def on_message(message):
                 sections = item.split("|")
                 if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
                   continue
-                if page*pageSize - (pageSize+1) <= count <= page*pageSize:
+                if page*pageSize - (pageSize)+1 <= count <= page*pageSize:
                   itemsOnPage += 1
                   texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
               if messagecontent.startswith(prefix+"bag") or (messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id):
