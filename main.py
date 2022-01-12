@@ -92,6 +92,7 @@ scrapAmounts = [10,20,30,40,50]
 multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 
 chestprice = 50
+rerollPrice = 25
 
 def openChest():
   adj = adjectives[random.randint(0,len(adjectives)-1)]
@@ -173,7 +174,7 @@ async def on_message(message):
 
   #chest manually
   if messagecontent == prefix+"chest":
-    if checkPerms(message):
+    #if checkPerms(message):
       encounter = encounters[random.randint(0,len(encounters)-1)]
       embed = discord.Embed(description="React to open!",color=0xFF0000)
       embed.set_author(name=encounter,icon_url="https://cdn.discordapp.com/attachments/929182726203002920/929966082318536764/chestRed.png")
@@ -452,6 +453,58 @@ async def on_message(message):
         await error(message, "Item ID must be numeric.")
     else:
       await error(message, "Please specify the item ID.")
+
+  #reroll
+  global items
+  if messagecontent.startswith(prefix+"reroll"):
+    splits = messagecontent.split()
+    if len(splits) == 3:
+      if splits[1].isnumeric():
+        guild1, count1 = getItem(message.author.id, int(splits[1]))
+        if guild1 != False:
+          print(splits[2])
+          if splits[2] == "adj" or splits[2] == "noun":
+            scrap = db["players"][str(message.author.id)]["scrap"]
+            if scrap >= rerollPrice:
+              db["players"][str(message.author.id)]["scrap"] = scrap - rerollPrice
+              item=""
+              emoji=""
+              splitItem = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+              adj = splitItem[2]
+              item = splitItem[3]
+              emoji = splitItem[0]
+              if splits[2] == "adj":
+                adj = adjectives[random.randint(0,len(adjectives)-1)]
+                if random.randint(1,5) == 1:
+                  adj = adj +" "+ adjectives[random.randint(0,len(adjectives)-1)]
+              elif splits[2] == "noun":
+                item = ""
+                emoji = ""
+                itm = items[random.randint(0,len(items)-1)]
+                for i in itm:
+                  if i.isalpha() or i == " ":
+                    item = item+i
+                  else:
+                    emoji = emoji + i
+              rarity = splitItem[1]
+              color = colors[rarities.index(rarity)]
+              addition = splitItem[4]
+              desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+              fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
+              db["players"][str(message.author.id)][guild1].insert(count1-1,fullItem)
+              db["players"][str(message.author.id)][guild1].pop(count1)
+              embed = discord.Embed(description=desc, title="Item "+ ("Adjective" if splits[2]=="adj" else "Noun") +" Rerolled for "+str(rerollPrice)+" "+scrapEmoji, color=color)
+              await message.channel.send(embed=embed)
+            else:
+              await error(message, "You only have **"+str(scrap)+"** "+scrapEmoji)
+          else:
+            await error(message, "Reroll type needs to be `adj` or `noun`")
+        else:
+          await error(message, "Item does not exist")
+      else:
+        await error(message, "Item ID must be numeric.")
+    else:
+      await error(message, "Please specify the item ID and reroll type (`adj`,`noun`)")
 
   #move an item in your bag
   if messagecontent.startswith(prefix+"move"):
