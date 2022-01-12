@@ -246,7 +246,7 @@ async def on_message(message):
   if messagecontent == prefix+"help":
     text = f"""
     **Member Commands**
-    `{prefix}help` - Displays this message
+    `{prefix}help [command]` - Displays this message
     `{prefix}prefix <new>` - Changes the command prefix
     `{prefix}bag` - Show all of your items
     `{prefix}pocket` - Show all your items from this server
