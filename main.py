@@ -349,26 +349,28 @@ async def on_message(message):
             break
           if guild != "scrap":
             if db["players"][str(message.author.id)][guild]:
-              #get invite link
-              link = db[str(guild)]["name"]
-              try:
-                done = False
-                if db[str(message.guild.id)]["join"] == True:
-                  g = client.get_guild(int(guild))
-                  for invite in await g.invites():
-                    if invite.inviter.id == client.user.id:
-                      link = "["+g.name+"]("+invite.url+")"
-                      done = True
-                      break
-                  if not done:
-                    inv = await g.text_channels[0].create_invite()
-                    link = "["+g.name+"]("+inv.url+")"
-              except:
-                pass
-              if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
-                texts = texts + "**" + link + "**\n"
-              elif messagecontent.startswith(prefix+"bag"):
-                texts = texts + "**" + link + "**\n"
+              if page*pageSize - (pageSize+1) <= count <= page*pageSize:
+                #get invite link
+                link = db[str(guild)]["name"]
+                try:
+                  done = False
+                  if db[str(message.guild.id)]["join"] == True:
+                    g = client.get_guild(int(guild))
+                    for invite in await g.invites():
+                      if invite.inviter.id == client.user.id:
+                        link = "["+g.name+"]("+invite.url+")"
+                        done = True
+                        break
+                    if not done:
+                      inv = await g.text_channels[0].create_invite()
+                      link = "["+g.name+"]("+inv.url+")"
+                except:
+                  pass
+                if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
+                  texts = texts + "**" + link + "**\n"
+                elif messagecontent.startswith(prefix+"bag"):
+                  texts = texts + "**" + link + "**\n"
+                
               for item in db["players"][str(message.author.id)][guild]:
                 if itemsOnPage >= pageSize:
                   break
