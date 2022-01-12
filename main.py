@@ -433,13 +433,13 @@ async def on_message(message):
     scrap = 0
     if str(message.author.id) in db["players"]:
       scrap = db["players"][str(message.author.id)]["scrap"]
-    embed2 = discord.Embed(description="Welcome to the shop. React with the corresponding number to buy an item.\n-------------------------")
+    embed2 = discord.Embed(description="```\n▌   Welcome to the shop   ▐\n```")
     embed2.set_author(name="🛒 Marketplace")
 
     #items
-    embed2.add_field(name="1️⃣ Item Chest | "+"15"+scrapEmoji, value="A common chest containing an item.", inline=False)
+    embed2.add_field(name="1️⃣ - Item Chest | "+"15"+scrapEmoji, value="A common chest containing an item.", inline=False)
     
-    embed2.set_footer(text="-----------------------\nScrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
+    embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
     msg = await message.channel.send(embed=embed2)
 
     numbers = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
@@ -510,7 +510,7 @@ async def on_message(message):
         if message.guild.get_member(int(splits[1])):
           tradee = message.guild.get_member(int(splits[1]))
           if tradee.id != message.author.id:
-            embed = discord.Embed(description="-----------------------------------")
+            embed = discord.Embed(description="▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃")
             embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
             embed.set_footer(text=tradee.name, icon_url=tradee.avatar_url)
             embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
