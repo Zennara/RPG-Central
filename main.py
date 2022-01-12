@@ -91,6 +91,8 @@ scrapEmoji = "🔩"
 scrapAmounts = [10,20,30,40,50]
 multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 
+chestprice = 50
+
 def openChest():
   adj = adjectives[random.randint(0,len(adjectives)-1)]
   if random.randint(1,5) == 1:
@@ -253,7 +255,6 @@ async def on_message(message):
                   link = "["+g.name+"]("+inv.url+")"
             except:
               pass
-            
             if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
               texts = texts + "**" + link + "**\n"
             elif messagecontent.startswith(prefix+"bag"):
@@ -529,7 +530,7 @@ async def on_message(message):
     embed2.set_author(name="🛒 Marketplace")
 
     #items
-    embed2.add_field(name="1️⃣ - Item Chest | "+"15"+scrapEmoji, value="A common chest containing an item.", inline=False)
+    embed2.add_field(name="1️⃣ - Item Chest | "+str(chestprice)+scrapEmoji, value="A common chest containing an item.", inline=False)
     
     embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
     msg = await message.channel.send(embed=embed2)
