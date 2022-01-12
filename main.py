@@ -328,8 +328,8 @@ async def on_message(message):
             await invite.delete(reason="Server set to private")
             break
       else:
-        embed = discord.Embed(description="🔒 Your server is already private on **"+client.user.name+"**.")
-      embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url, color=0x000000)
+        embed = discord.Embed(description="🔒 Your server is already private on **"+client.user.name+"**.",color=0x000000)
+      embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
       await message.channel.send(embed=embed)
 
   #private
@@ -359,12 +359,14 @@ async def on_message(message):
             break
           if guild != "scrap" and guild != "trading":
             if db["players"][str(message.author.id)][guild]:
+              print(page*pageSize - (pageSize+1))
+              print(page*pageSize)
               if page*pageSize - (pageSize+1) <= count <= page*pageSize:
                 #get invite link
                 link = db[str(guild)]["name"]
                 try:
                   done = False
-                  if db[str(message.guild.id)]["join"] == True:
+                  if db[str(guild)]["join"] == True:
                     g = client.get_guild(int(guild))
                     for invite in await g.invites():
                       if invite.inviter.id == client.user.id:
