@@ -554,7 +554,7 @@ async def on_message(message):
                     break
                   tradeeAgree = False
   
-              embed = discord.Embed(description="-----------------------------------")
+              embed = discord.Embed(description=traderTrades+"/n-----------------------------------/n"+tradeeTrades)
               embed.set_author(name=message.author.name+(" -- [✅ Agreed]" if traderAgree else ""), icon_url=message.author.avatar_url)
               embed.set_footer(text=tradee.name+(" -- [✅ Agreed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
               embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
@@ -566,10 +566,15 @@ async def on_message(message):
            
             if done:
               await msg.clear_reactions()
+              embed = discord.Embed(description=traderTrades+"/n-----------------------------------/n"+tradeeTrades)
+              embed.set_author(name=message.author.name+(" -- [✅ Confirmed]" if traderAgree else ""), icon_url=message.author.avatar_url)
+              embed.set_footer(text=tradee.name+(" -- [✅ Confirmed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
+              embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930380635300823060/temp-removebg-preview.png")
+              await msg.edit(embed=embed)
               print("confirmed")
             else:
               await msg.clear_reactions()
-              embed = discord.Embed(description="-----------------------------------")
+              embed = discord.Embed(description=traderTrades+"/n-----------------------------------/n"+tradeeTrades)
               embed.set_author(name=message.author.name+(" -- [🚫 Cancelled]" if user2.id==message.author.id else ""), icon_url=message.author.avatar_url)
               embed.set_footer(text=tradee.name+(" -- [🚫 Cancelled]" if user2.id==tradee.id else ""), icon_url=tradee.avatar_url)
               embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930394152309510184/images-removebg-preview.png")

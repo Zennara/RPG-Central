@@ -284,7 +284,7 @@
 🏒Hockey Stick
 🏓Paddle
 🏸Racket
-🥊Boxine
+🥊Boe
 🥋Gi
 🥅Net
 ⛸️Ice Skate
@@ -432,7 +432,83 @@
 ⚖️Scale
 🦯Cane
 ⛓️
-🪵LogChain
+🪵Log
+💀Skull
+💩Poop
+👻Ghost
+👾Alien
+🤖Robot
+💋Kiss
+💅Nail Polish
+💪Arm
+🦾Mechanical Arm
+🦿Mechanical Leg
+🦵Leg
+🦶Foot
+👂Ear
+🦻Hearing Aid
+👃Nose
+🧠Brain
+🫀Heart
+🫁Lungs
+🦷Tooth
+🦴Bone
+👁️Eye
+👅Tongue
+👄Mouth
+👼Angel
+🧚Fairy
+🧟Zombie
+👤Bust
+🧳Luggage
+☂️Umbrella
+🎃Jack-O-Lantern
+🧵Thread
+🧶Yarn
+👓Glasses
+🕶️Sunglasses
+🥽Goggles
+🥼Lab Coat
+🦺Safety Vest
+👔Necktie
+👕Shirt
+👖Pants
+🧣Scarf
+🧤Gloves
+🧥Coat
+🧦Socks
+👗Dress
+👘Kimono
+🥻Sari
+🩱Swimsuit
+🩲Undies
+🩳Shorts
+👙Bikini
+👚Blouse
+👛Purse
+👜Handbag
+🎒Backpack
+🩴Sandals
+👞Shoes
+👟Sneakers
+🥾Boots
+🥿Shoes
+👠Heels
+👡Sandals
+🩰Ballet Shoes
+👢Boots
+👑Crown
+👒Hat
+🎩Top Hat
+🎓Graduation Cap
+🧢Baseball Cap
+🪖Helmet
+⛑️Hardhat
+💄Makeup
+💍Ring
+💼Briefcase
+👝Pouch
+😃MaskChain
 🪝Hook
 🧰Toolbox
 🧲Magnet
