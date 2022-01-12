@@ -8,9 +8,10 @@ import os #for virtual environment secrets on replit
 import keep_alive #this keeps our bot alive from the keep_alive.py file
 import asyncio #not needed unless creating loop tasks etc (you'll run into it)
 import json #to write db to a json file
-import requests #to check discord api for limits/bans
+import requests #to check discord   api for limits/bans
 from replit import db #database storage
 import random
+from datetime import datetime
 
 #api limit checker
 #rate limits occur when you access the api too much. You can view Discord.py's api below. There it will tell you whether an action will access the api.
@@ -114,6 +115,8 @@ multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 chestprice = 50
 rerollPrice = 25
 
+chestChanceMAX = 100
+
 pageSize = 8
 
 def openChest():
@@ -140,6 +143,8 @@ async def on_message(message):
   #check for bots
   if message.author.bot:
     return
+
+  global cooldowns
 
   #convert the message to all lowercase
   messagecontent = message.content.lower()
@@ -193,33 +198,32 @@ async def on_message(message):
         await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@` , ` `")
 
   #generate item manually
-  if messagecontent == prefix+"gen":
-    desc, color, fullItem = openChest()
+  #if messagecontent == prefix+"gen":
+    #desc, color, fullItem = openChest()
     #send message
-    embed = discord.Embed(description=desc, color=color)
-    await message.channel.send(embed=embed)
+    #embed = discord.Embed(description=desc, color=color)
+    #await message.channel.send(embed=embed)
 
-  #chest manually
-  if messagecontent == prefix+"chest":
-    #if checkPerms(message):
-      encounter = encounters[random.randint(0,len(encounters)-1)]
-      embed = discord.Embed(description="React to open!",color=0xFF0000)
-      embed.set_author(name=encounter,icon_url="https://cdn.discordapp.com/attachments/929182726203002920/929966082318536764/chestRed.png")
-      msg = await message.channel.send(embed=embed)
-      await msg.add_reaction("💎")
-  
-      def check(reaction, user):
-        if reaction.message==msg and str(reaction.emoji)=="💎" and not user.bot:
-          asyncio.create_task(reaction.message.clear_reactions()) 
-          return True
-          
-      reaction, user = await client.wait_for('reaction_add', check=check)
-  
+  async def spawnChest():
+    encounter = encounters[random.randint(0,len(encounters)-1)]
+    embed = discord.Embed(description="React to open!",color=0xFF0000)
+    embed.set_author(name=encounter,icon_url="https://cdn.discordapp.com/attachments/929182726203002920/929966082318536764/chestRed.png")
+    msg = await message.channel.send(embed=embed)
+    await msg.add_reaction("💎")
+    def check(reaction, user):
+      if reaction.message==msg and str(reaction.emoji)=="💎" and not user.bot:
+        asyncio.create_task(reaction.message.clear_reactions()) 
+        return True  
+    try:
+      reaction, user = await client.wait_for('reaction_add', check=check, timeout=300)
+    except asyncio.TimeoutError:
+      embed = discord.Embed(description="🏃 Looks like someone got the loot before you...")
+      msg.edit(embed=embed)
+    else:
       desc, color, fullItem = openChest()
       embed = discord.Embed(description=desc, color=color) 
       embed.set_author(name=user.name+" Opened:", icon_url=user.avatar_url)
       await msg.edit(embed=embed)
-  
       #find user in db
       if str(user.id) not in db["players"]:
         db["players"][str(user.id)] = {}
@@ -227,9 +231,16 @@ async def on_message(message):
         db["players"][str(user.id)]["trading"] = ""
       if str(message.guild.id) not in db["players"][str(user.id)]:
         db["players"][str(user.id)][str(message.guild.id)] = []
-  
       #give item
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
+    
+  #chest manually
+  #if messagecontent == prefix+"chest":
+    #if checkPerms(message):
+      #await spawnChest()
+  
+  if random.randint(1, chestChanceMAX) == 1:
+    await spawnChest()
 
   #help
   if messagecontent == prefix+"help":
@@ -468,12 +479,16 @@ async def on_message(message):
               await msg.add_reaction("⚫")
               await msg.add_reaction("❌")
               while True:
-                reaction, user = await client.wait_for('reaction_add', check=checkR)
-                if str(reaction.emoji) == "✅":
+                try:
+                  reaction, user = await client.wait_for('reaction_add', check=checkR, timeout=30)
+                except asyncio.TimeoutError:
                   break
-                if str(reaction.emoji) == "❌":
-                  done = True
-                  break
+                else:
+                  if str(reaction.emoji) == "✅":
+                    break
+                  if str(reaction.emoji) == "❌":
+                    done = True
+                    break
               if not done:
                 del db["players"][str(message.author.id)][guild1][count1-1]
                 embed = discord.Embed(description=deletedItem,color=0x000000, title="🗑️ Item deleted.")
@@ -606,12 +621,16 @@ async def on_message(message):
               await msg.add_reaction("⚫")
               await msg.add_reaction("❌")
               while True:
-                reaction, user = await client.wait_for('reaction_add', check=checkR)
-                if str(reaction.emoji) == "✅":
+                try:
+                  reaction, user = await client.wait_for('reaction_add', check=checkR, timeout=30)
+                except asyncio.TimeoutError:
                   break
-                if str(reaction.emoji) == "❌":
-                  done = True
-                  break
+                else:
+                  if str(reaction.emoji) == "✅":
+                    break
+                  if str(reaction.emoji) == "❌":
+                    done = True
+                    break
               if not done:
                 del db["players"][str(message.author.id)][guild1][count1-1]
                 db["players"][str(message.author.id)]["scrap"] += scrapAmount
@@ -796,38 +815,44 @@ async def on_message(message):
         await msg.add_reaction(numbers[x])  
   
       while True:
-        reaction, user = await client.wait_for('reaction_add', check=checkR)
-        if str(reaction.emoji) in shopAmount:
-          if trading() == "":
-            boughtItem = shopItems[numbers.index(str(reaction.emoji))]
-            price = prices[numbers.index(str(reaction.emoji))]
-            if scrap >= int(price[:-1]):
-              db["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-1])
-              
-              desc, color, fullItem = openChest()
-              #find user in db
-              if str(message.author.id) not in db["players"]:
-                db["players"][str(message.author.id)] = {}
-                db["players"][str(message.author.id)]["scrap"] = 0
-              if str(message.guild.id) not in db["players"][str(message.author.id)]:
-                db["players"][str(message.author.id)][str(message.guild.id)] = []
-          
-              #give item
-              db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
-              scrap = db["players"][str(message.author.id)]["scrap"]
-              
-              embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price+"\n"+desc,color=color)
-              await message.channel.send(embed=embed)
-              embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
-              await msg.edit(embed=embed2)
-            else:
-              await error(message, "You only have "+str(scrap)+scrapEmoji)
-          else:
-            await error(message, f"Current active trade [here]({trading()})")
-        if str(reaction.emoji) == "❌":
-          embed = discord.Embed(description="You left the shop.",color=0xFF0000)
+        try:
+          reaction, user = await client.wait_for('reaction_add', check=checkR, timeout=30)
+        except asyncio.TimeoutError:
+          embed = discord.Embed(description="Looks like the shopkeeper got tired of waiting...",color=0xFF0000)
           await msg.edit(embed=embed)
           break
+        else:
+          if str(reaction.emoji) in shopAmount:
+            if trading() == "":
+              boughtItem = shopItems[numbers.index(str(reaction.emoji))]
+              price = prices[numbers.index(str(reaction.emoji))]
+              if scrap >= int(price[:-1]):
+                db["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-1])
+                
+                desc, color, fullItem = openChest()
+                #find user in db
+                if str(message.author.id) not in db["players"]:
+                  db["players"][str(message.author.id)] = {}
+                  db["players"][str(message.author.id)]["scrap"] = 0
+                if str(message.guild.id) not in db["players"][str(message.author.id)]:
+                  db["players"][str(message.author.id)][str(message.guild.id)] = []
+            
+                #give item
+                db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+                scrap = db["players"][str(message.author.id)]["scrap"]
+                
+                embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price+"\n"+desc,color=color)
+                await message.channel.send(embed=embed)
+                embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
+                await msg.edit(embed=embed2)
+              else:
+                await error(message, "You only have "+str(scrap)+scrapEmoji)
+            else:
+              await error(message, f"Current active trade [here]({trading()})")
+          if str(reaction.emoji) == "❌":
+            embed = discord.Embed(description="You left the shop.",color=0xFF0000)
+            await msg.edit(embed=embed)
+            break
     else:
       await error(message, f"Current active trade [here]({trading()})")
 
