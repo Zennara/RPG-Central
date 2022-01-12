@@ -121,14 +121,14 @@ async def on_message(message):
 
   #check if in server
   if str(message.guild.id) not in db:
-    db[str(message.guild.id)] = {"prefix": "!"}
+    db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name}
 
   #this will clear the database if something is broken, WARNING: will delete all entries
   if messagecontent == "!clear":
     for key in db.keys():
       del db[key]
     #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
-    db[str(message.guild.id)] = {"prefix": "!"}
+    db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name}
     db["players"] = {}
 
   #get prefix
@@ -633,8 +633,14 @@ async def on_message(message):
 
 @client.event
 async def on_guild_join(guild):
-  db[str(guild.id)] = {"prefix": "!"} #for database support
+  db[str(guild.id)] = {"prefix": "!", "name" : guild.name} #for database support
   db["players"] = {}
+
+@client.event
+async def on_guild_update(before, after):
+  if str(before.id) not in db:
+    db[str(before.id)] = {"prefix": "!", "name" : after.name}
+  db[str(before.id)] = {"prefix": db[str(before.id)]["prefix"], "name" : after.name}
 
 
 keep_alive.keep_alive() 
