@@ -210,12 +210,18 @@ async def on_message(message):
       scrapAmount = str(db["players"][str(message.author.id)]["scrap"])
       for guild in db["players"][str(message.author.id)]:
         if guild != "scrap":
-          for item in db["players"][str(message.author.id)][guild]:
-            count +=1
-            sections = item.split("|")
-            if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
-              continue
-            texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
+          if db["players"][str(message.author.id)][guild]:
+            if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
+              texts = texts + "**" + db[str(guild)]["name"] + "**\n"
+            elif messagecontent.startswith(prefix+"bag"):
+              texts = texts + "**" + db[str(guild)]["name"] + "**\n"
+            for item in db["players"][str(message.author.id)][guild]:
+              count +=1
+              sections = item.split("|")
+              if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
+                continue
+              texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
+            texts = texts + "\n"
     if texts.strip() == "":
       texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
     #webhook = await getWebhook(message.channel)
