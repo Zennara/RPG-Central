@@ -287,7 +287,7 @@ async def on_message(message):
           guild1, count1 = getItem(message.author.id, id)
           if guild1 != False:
             deletedItem = db["players"][str(message.author.id)][guild1][count1-1].replace("|"," ")
-            embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to delete this item?\n"+deletedItem)
+            embed = discord.Embed(color=0xff0000, description=deletedItem, title="⚠️ Are you sure you want to delete?")
             msg = await message.channel.send(embed=embed)
             done = False
             def checkR(reaction, user):
@@ -311,7 +311,7 @@ async def on_message(message):
                 break
             if not done:
               del db["players"][str(message.author.id)][guild1][count1-1]
-              embed = discord.Embed(description="🗑️ Item was deleted.\n"+deletedItem,color=0x00FF00)
+              embed = discord.Embed(description=deletedItem,color=0x00FF00, title="🗑️ Item deleted.")
               await msg.edit(embed=embed)
             else:
               embed = discord.Embed(description="Deletion cancelled.",color=0x00FF00)
@@ -413,11 +413,9 @@ async def on_message(message):
         guild1, count1 = getItem(message.author.id, int(splits[1]))
         if guild1 != False:
           splits = db["players"][str(message.author.id)][guild1][count1-1].split("|")
-          scrapItem = splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+          scrapItem = emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
           scrapAmount = scrapAmounts[rarities.index(splits[1])] * multipliers[int(splits[4].replace("+",""))]
-          print(scrapAmounts[rarities.index(splits[1])])
-          print(multipliers[int(splits[4].replace("+",""))])
-          embed = discord.Embed(color=0xff0000, description="⚠️ Are you sure you want to **scrap** this item for "+ str(scrapAmount) +scrapEmoji +"?\n"+scrapItem)
+          embed = discord.Embed(color=0xff0000, description=scrapItem, title="⚠️ Are you sure you want to **scrap** this item for "+ str(scrapAmount) +scrapEmoji +"?")
           msg = await message.channel.send(embed=embed)
           done = False
           def checkR(reaction, user):
@@ -442,7 +440,7 @@ async def on_message(message):
           if not done:
             del db["players"][str(message.author.id)][guild1][count1-1]
             db["players"][str(message.author.id)]["scrap"] += scrapAmount
-            embed = discord.Embed(description="⚙️ Item was scrapped for "+ str(scrapAmount) +scrapEmoji+"\n"+scrapItem,color=0x00FF00)
+            embed = discord.Embed(description=scrapItem,color=0x00FF00,title="⚙️ Item was scrapped for "+ str(scrapAmount) +scrapEmoji)
             await msg.edit(embed=embed)
           else:
             embed = discord.Embed(description="Scrap cancelled.",color=0x00FF00)
@@ -456,14 +454,13 @@ async def on_message(message):
 
   #reroll
   global items
-  if messagecontent.startswith(prefix+"reroll"):
+  if messagecontent.startswith(prefix+"distill") or messagecontent.startswith(prefix+"transmute"):
     splits = messagecontent.split()
-    if len(splits) == 3:
+    if len(splits) == 2:
       if splits[1].isnumeric():
         guild1, count1 = getItem(message.author.id, int(splits[1]))
         if guild1 != False:
-          print(splits[2])
-          if splits[2] == "adj" or splits[2] == "noun":
+          if splits[0] == prefix+"distill" or splits[0] == prefix+"transmute":
             scrap = db["players"][str(message.author.id)]["scrap"]
             if scrap >= rerollPrice:
               db["players"][str(message.author.id)]["scrap"] = scrap - rerollPrice
@@ -473,11 +470,11 @@ async def on_message(message):
               adj = splitItem[2]
               item = splitItem[3]
               emoji = splitItem[0]
-              if splits[2] == "adj":
+              if splits[0] == prefix+"distill":
                 adj = adjectives[random.randint(0,len(adjectives)-1)]
                 if random.randint(1,5) == 1:
                   adj = adj +" "+ adjectives[random.randint(0,len(adjectives)-1)]
-              elif splits[2] == "noun":
+              elif splits[0] == prefix+"transmute":
                 item = ""
                 emoji = ""
                 itm = items[random.randint(0,len(items)-1)]
@@ -493,7 +490,7 @@ async def on_message(message):
               fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
               db["players"][str(message.author.id)][guild1].insert(count1-1,fullItem)
               db["players"][str(message.author.id)][guild1].pop(count1)
-              embed = discord.Embed(description=desc, title="Item "+ ("Adjective" if splits[2]=="adj" else "Noun") +" Rerolled for "+str(rerollPrice)+" "+scrapEmoji, color=color)
+              embed = discord.Embed(description=desc, title="Item "+ ("Distilled" if splits[0]==prefix+"distill" else "Transmuted") +" for "+str(rerollPrice)+" "+scrapEmoji, color=color)
               await message.channel.send(embed=embed)
             else:
               await error(message, "You only have **"+str(scrap)+"** "+scrapEmoji)
@@ -504,7 +501,7 @@ async def on_message(message):
       else:
         await error(message, "Item ID must be numeric.")
     else:
-      await error(message, "Please specify the item ID and reroll type (`adj`,`noun`)")
+      await error(message, "Please specify the item ID.")
 
   #move an item in your bag
   if messagecontent.startswith(prefix+"move"):
