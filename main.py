@@ -203,6 +203,92 @@ async def on_message(message):
       #give item
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
 
+  #help
+  if messagecontent == prefix+"help":
+    text = f"""
+    **Member Commands**
+    `{prefix}help` - Displays this message
+    `{prefix}prefix <new>` - Changes the command prefix
+    `{prefix}bag` - Show all of your items
+    `{prefix}pocket` - Show all your items from this server
+    `{prefix}shop` - View the marketplace
+    `{prefix}trade <member>` - Start a trade with another player
+    `{prefix}distill <id>` - Change the adjective of your item
+    `{prefix}transmute <id>` - Change the object of your item
+    `{prefix}scrap <id>` - Scrap the item
+    `{prefix}give <member> <id>` - Give the item to another player
+    `{prefix}delete <id>` - Delete an item
+
+    **Staff Commands**
+    `{prefix}private` - Set your server to private
+    `{prefix}public` - Set your server to public
+    """
+    embed = discord.Embed(description=text, color=0x000000)
+    embed.set_footer(text="<> - Required | [] - Optional")
+    await message.channel.send(embed=embed)
+
+  #help for each command
+  elif messagecontent.startswith(prefix+"help"):
+    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","give","delete","private","public"]
+    if messagecontent.split()[1] in commands:
+      cmd = commands.index(messagecontent.split()[1])
+      if cmd==0:
+        text=f"""
+        This shows a page with all of the available commands. Anything wrapped in `<` and `>` are **required** arguments, while anything wrapped in `[` and `]` are **optional** arguments. An argument is a value you put into the command like information, a member, or an ID. You can find more help in my [discord server](https://discord.gg/y5FJsThMsc).
+        """
+      elif cmd==1:
+        text=f"""
+        This command will change the prefix for your server. Every server with this bot can have their own, custom prefix. {message.guild.name}'s prefix is currently `{prefix}`
+        """
+      elif cmd==2:
+        text=f"""
+        This will show you all of the contents of your inventory across all servers. You can find your **items** and **scrap** {scrapEmoji} here. Items are seperated by server. If the server you found an item in is a public server, a hyperlink to that server will be it's name.
+        """
+      elif cmd==3:
+        text=f"""
+        This will show you your inventory in a more simplified version. Only the items from the current server you used the command in will be shown.
+        """
+      elif cmd==4:
+        text=f"""
+        This opens the **shop**. You can buy chests here for new items with your **scrap** {scrapEmoji}. The current price is {chestprice} {scrapEmoji}.
+        """
+      elif cmd==5:
+        text=f"""
+        This initiates a trade with another player. If they accept, you can add and remove **items** or **scrap** {scrapEmoji} to trade. To accept a trade, react with ✅. To cancel your acceptance or to cancel the trade, react with ❌. When both player confirm the trade, the agreed upon items will be transferred.
+        """
+      elif cmd==6:
+        text=f"""
+        This will give you a chance to get a new **adjective** for your item. Currently this costs {rerollPrice} {scrapEmoji}.
+        """
+      elif cmd==7:
+        text=f"""
+        This will give you a chance to get a new **noun** and **emoji** for your item. Currently this costs {rerollPrice} {scrapEmoji}.
+        """
+      elif cmd==8:
+        text=f"""
+        This will scrap the item with the `id` you inputted. A confirmation message will appear with the amount it is scrapped for. Scrap prices are determined by the **rarity** and multiplied by the **addition** (+-).
+        """
+      elif cmd==9:
+        text=f"""
+        This will give the item matching the `id` to the designated `member`. You can use the members **mention** or **id** for the command.
+        """
+      elif cmd==10:
+        text=f"""
+        This will delete the item matching the `id`. Warning: this **can not** be undone.
+        """
+      elif cmd==11:
+        text=f"""
+        Set your server to `private`. This **will not allow** users from other guilds to join off items and bags. This will also delete any valid invite links created by {client.user.name}. Only usable by members with the `Manage_Guild` permission.
+        """
+      elif cmd==12:
+        text=f"""
+        Set your server to `public`. This **will allow** users from other guilds to join off items and bags. Only usable by members with the `Manage_Guild` permission.
+        """
+
+      #send command
+      embed = discord.Embed(description=text, color=0x000000, title=commands[commands.index(messagecontent.split()[1])].capitalize())
+      await message.channel.send(embed=embed)
+
   #private
   if messagecontent == prefix+"private":
     if checkPerms(message):
@@ -215,17 +301,17 @@ async def on_message(message):
             break
       else:
         embed = discord.Embed(description="🔒 Your server is already private on **"+client.user.name+"**.")
-      embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+      embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url, color=0x000000)
       await message.channel.send(embed=embed)
 
   #private
   if messagecontent == prefix+"public":
     if checkPerms(message):
       if db[str(message.guild.id)]["join"] == False:
-        embed = discord.Embed(description="🔓 Your server is now public on **"+client.user.name+"**.")
+        embed = discord.Embed(description="🔓 Your server is now public on **"+client.user.name+"**.", color=0x000000)
         db[str(message.guild.id)]["join"] = True
       else:
-        embed = discord.Embed(description="🔓 Your server is already public on **"+client.user.name+"**.")
+        embed = discord.Embed(description="🔓 Your server is already public on **"+client.user.name+"**.", color=0x000000)
       embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
       await message.channel.send(embed=embed)
 
@@ -272,7 +358,7 @@ async def on_message(message):
     #webhook = await getWebhook(message.channel)
     #add scrap
     texts = scrapEmoji + " **Scrap:** "+ scrapAmount +"\n\n"+ texts
-    embed = discord.Embed(description=texts, color=0xFFFFFF)
+    embed = discord.Embed(description=texts, color=0x000000)
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
     embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
     await message.channel.send(embed=embed)
@@ -287,7 +373,7 @@ async def on_message(message):
           guild1, count1 = getItem(message.author.id, id)
           if guild1 != False:
             deletedItem = db["players"][str(message.author.id)][guild1][count1-1].replace("|"," ")
-            embed = discord.Embed(color=0xff0000, description=deletedItem, title="⚠️ Are you sure you want to delete?")
+            embed = discord.Embed(color=0x000000, description=deletedItem, title="⚠️ Are you sure you want to delete?")
             msg = await message.channel.send(embed=embed)
             done = False
             def checkR(reaction, user):
@@ -311,10 +397,10 @@ async def on_message(message):
                 break
             if not done:
               del db["players"][str(message.author.id)][guild1][count1-1]
-              embed = discord.Embed(description=deletedItem,color=0x00FF00, title="🗑️ Item deleted.")
+              embed = discord.Embed(description=deletedItem,color=0x000000, title="🗑️ Item deleted.")
               await msg.edit(embed=embed)
             else:
-              embed = discord.Embed(description="Deletion cancelled.",color=0x00FF00)
+              embed = discord.Embed(description="✅ Deletion cancelled.",color=0x000000)
               await msg.edit(embed=embed)
           else:
             await error(message, "Item does not exist.")
@@ -383,7 +469,7 @@ async def on_message(message):
                   #subtract amount
                   db["players"][str(message.author.id)]["scrap"] = scrap - amount
                   #confirmation message
-                  embed = discord.Embed(description="gave **"+str(amount)+"** "+scrapEmoji + " to:")
+                  embed = discord.Embed(color=0x000000,description="gave **"+str(amount)+"** "+scrapEmoji + " to:")
                   embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                   embed.set_footer(text=mbr.name,icon_url=mbr.avatar_url)
                   await message.channel.send(embed=embed)
@@ -437,10 +523,10 @@ async def on_message(message):
           if not done:
             del db["players"][str(message.author.id)][guild1][count1-1]
             db["players"][str(message.author.id)]["scrap"] += scrapAmount
-            embed = discord.Embed(description=scrapItem,color=0x00FF00,title="⚙️ Item was scrapped for "+ str(scrapAmount) +scrapEmoji)
+            embed = discord.Embed(description=scrapItem,color=0x000000,title="⚙️ Item was scrapped for "+ str(scrapAmount) +scrapEmoji)
             await msg.edit(embed=embed)
           else:
-            embed = discord.Embed(description="Scrap cancelled.",color=0x00FF00)
+            embed = discord.Embed(description="❌ Scrap cancelled.",color=0x000000)
             await msg.edit(embed=embed)
         else:
           await error(message, "Item does not exist.")
@@ -516,8 +602,8 @@ async def on_message(message):
                   db["players"][str(message.author.id)][guild1].pop(count1-1)
                   db["players"][str(message.author.id)][guild1].insert(count2-1, insertItem)           
                   item1 = db["players"][str(message.author.id)][guild1][count2-1].split("|")
-                  item1 = emojis[rarities.index(item1[1])] + item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
-                  embed = discord.Embed(title="**Moved**",description=item1+"\n`"+splits[1]+"` ➡️ `"+splits[2]+"`")
+                  item1 = emojis[rarities.index(item1[1])] +" "+ item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
+                  embed = discord.Embed(color=colors[rarities.index(item1[1])],title="🚚 **Moved**",description=item1+"\n`"+splits[1]+"` ➡️ `"+splits[2]+"`")
                   await message.channel.send(embed=embed)
                 else:
                   await error(message, "Cannot move item to an index of another guild.")
@@ -551,7 +637,7 @@ async def on_message(message):
                   item2 = db["players"][str(message.author.id)][guild2][count2-1].split("|")
                   item2 = "`"+splits[2]+"` "+emojis[rarities.index(item2[1])] + item2[0] +" **["+ item2[1] +"]** "+ item2[2] +" "+ item2[3] +" "+ item2[4]
                   db["players"][str(message.author.id)][guild1][count1-1],db["players"][str(message.author.id)][guild2][count2-1] = db["players"][str(message.author.id)][guild2][count2-1],db["players"][str(message.author.id)][guild1][count1-1]
-                  embed = discord.Embed(title="**Swapped**",description=item1 +"\n**with**\n" + item2)
+                  embed = discord.Embed(color=0x000000,title="🔀 **Swapped**",description=item1 +"\n**with**\n" + item2)
                   await message.channel.send(embed=embed)
                 else:
                   await error(message, "Cannot swap items from two different servers.")
@@ -573,7 +659,7 @@ async def on_message(message):
     scrap = 0
     if str(message.author.id) in db["players"]:
       scrap = db["players"][str(message.author.id)]["scrap"]
-    embed2 = discord.Embed(description="```\n▌   Welcome to the shop   ▐\n```")
+    embed2 = discord.Embed(color=0x000000,description="```\n▌   Welcome to the shop   ▐\n```")
     embed2.set_author(name="🛒 Marketplace")
 
     #items
