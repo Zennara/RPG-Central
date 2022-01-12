@@ -329,32 +329,29 @@ async def on_message(message):
   if messagecontent.startswith(prefix+"give"):
     splits = messagecontent.split()
     if len(splits) == 3:
-      if splits[1].isnumeric():
+      if splits[2].isnumeric():
         mbr = splits[1].replace("<","").replace(">","").replace("@","").replace("!","")
         if mbr.isnumeric():
           if message.guild.get_member(int(mbr)):
             mbr = message.guild.get_member(int(mbr))
-            if splits[2].isnumeric():
-              guild1, count1 = getItem(message.author.id, int(splits[2]))
-              if guild1 != False:
-                item = db["players"][str(message.author.id)][guild1][count1-1]
-                del db["players"][str(message.author.id)][guild1][count1-1]
-                if str(mbr.id) not in db["players"]:
-                  db["players"][str(mbr.id)] = {}
-                  db["players"][str(mbr.id)]["scrap"] = 0
-                if guild1 not in db["players"][str(mbr.id)]:
-                  db["players"][str(mbr.id)][guild1] = []
-                db["players"][str(mbr.id)][guild1].append(item)
-                splits = item.split("|")
-                item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
-                embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
-                embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
-                embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
-                await message.channel.send(embed=embed)
-              else:
-                await error(message, "Item does not exist.")
+            guild1, count1 = getItem(message.author.id, int(splits[2]))
+            if guild1 != False:
+              item = db["players"][str(message.author.id)][guild1][count1-1]
+              del db["players"][str(message.author.id)][guild1][count1-1]
+              if str(mbr.id) not in db["players"]:
+                db["players"][str(mbr.id)] = {}
+                db["players"][str(mbr.id)]["scrap"] = 0
+              if guild1 not in db["players"][str(mbr.id)]:
+                db["players"][str(mbr.id)][guild1] = []
+              db["players"][str(mbr.id)][guild1].append(item)
+              splits = item.split("|")
+              item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
+              embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
+              embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
+              embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
+              await message.channel.send(embed=embed)
             else:
-              await error(message, "Item ID must be numeric.")
+              await error(message, "Item does not exist.")
           else:
             await error(message, "Member not in the guild.")
         else:
