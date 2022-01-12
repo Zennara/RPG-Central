@@ -121,14 +121,14 @@ async def on_message(message):
 
   #check if in server
   if str(message.guild.id) not in db:
-    db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name}
+    db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
 
   #this will clear the database if something is broken, WARNING: will delete all entries
   if messagecontent == "!clear":
     for key in db.keys():
       del db[key]
     #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
-    db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name}
+    db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
     db["players"] = {}
 
   #get prefix
@@ -200,6 +200,32 @@ async def on_message(message):
       #give item
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
 
+  #private
+  if messagecontent == prefix+"private":
+    if checkPerms(message):
+      if db[str(message.guild.id)]["join"] == True:
+        embed = discord.Embed(description="🔒 Your server is now private on **"+client.user.name+"**.")
+        db[str(message.guild.id)]["join"] = False
+        for invite in await message.guild.invites():
+          if invite.inviter.id == client.user.id:
+            await invite.delete(reason="Server set to private")
+            break
+      else:
+        embed = discord.Embed(description="🔒 Your server is already private on **"+client.user.name+"**.")
+      embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+      await message.channel.send(embed=embed)
+
+  #private
+  if messagecontent == prefix+"public":
+    if checkPerms(message):
+      if db[str(message.guild.id)]["join"] == False:
+        embed = discord.Embed(description="🔓 Your server is now public on **"+client.user.name+"**.")
+        db[str(message.guild.id)]["join"] = True
+      else:
+        embed = discord.Embed(description="🔓 Your server is already public on **"+client.user.name+"**.")
+      embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+      await message.channel.send(embed=embed)
+
   #view bag
   texts = ""
   count = 0
@@ -211,10 +237,27 @@ async def on_message(message):
       for guild in db["players"][str(message.author.id)]:
         if guild != "scrap":
           if db["players"][str(message.author.id)][guild]:
+            #get invite link
+            link = db[str(guild)]["name"]
+            try:
+              done = False
+              if db[str(message.guild.id)]["join"] == True:
+                g = client.get_guild(int(guild))
+                for invite in await g.invites():
+                  if invite.inviter.id == client.user.id:
+                    link = "["+g.name+"]("+invite.url+")"
+                    done = True
+                    break
+                if not done:
+                  inv = await g.text_channels[0].create_invite()
+                  link = "["+g.name+"]("+inv.url+")"
+            except:
+              pass
+            
             if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
-              texts = texts + "**" + db[str(guild)]["name"] + "**\n"
+              texts = texts + "**" + link + "**\n"
             elif messagecontent.startswith(prefix+"bag"):
-              texts = texts + "**" + db[str(guild)]["name"] + "**\n"
+              texts = texts + "**" + link + "**\n"
             for item in db["players"][str(message.author.id)][guild]:
               count +=1
               sections = item.split("|")
@@ -639,14 +682,14 @@ async def on_message(message):
 
 @client.event
 async def on_guild_join(guild):
-  db[str(guild.id)] = {"prefix": "!", "name" : guild.name} #for database support
+  db[str(guild.id)] = {"prefix": "!", "name" : guild.name, "join" : False} #for database support
   db["players"] = {}
 
 @client.event
 async def on_guild_update(before, after):
   if str(before.id) not in db:
-    db[str(before.id)] = {"prefix": "!", "name" : after.name}
-  db[str(before.id)] = {"prefix": db[str(before.id)]["prefix"], "name" : after.name}
+    db[str(before.id)] = {"prefix": "!", "name" : after.name, "join" : False}
+  db[str(before.id)] = {"prefix": db[str(before.id)]["prefix"], "name" : after.name, "join" : False}
 
 
 keep_alive.keep_alive() 
