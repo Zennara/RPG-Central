@@ -794,15 +794,13 @@ async def on_message(message):
         await msg.edit(embed=embed)
         break
 
-  #additem
-  if messagecontent.startswith(prefix+"additem"):
-    pass
-  #addscrap
-  if messagecontent.startswith(prefix+"addscrap"):
-    pass
   #trade command
-  traderTrades = ""
-  tradeeTrades = ""
+  traderTrades = []
+  tradeeTrades = []
+  displayedTrader = []
+  displayedTradee = []
+  scrapTrader = ["0"]
+  scrapTradee = ["0"]
   if messagecontent.startswith(prefix+"trade"):
     splits = messagecontent.split()
     if len(splits) == 2:
@@ -810,29 +808,145 @@ async def on_message(message):
       if splits[1].isnumeric():
         if message.guild.get_member(int(splits[1])):
           tradee = message.guild.get_member(int(splits[1]))
+          print(tradee.id)
           if tradee.id != message.author.id:
-            embed = discord.Embed(description="▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃")
+            embed = discord.Embed(description="\n".join(displayedTrader)+"\n"+"".join(scrapTrader)+scrapEmoji+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+"".join(scrapTradee)+scrapEmoji+"\n"+"\n".join(displayedTradee))
             embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
             embed.set_footer(text=tradee.name, icon_url=tradee.avatar_url)
             embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
             msg = await message.channel.send(embed=embed)
+            await msg.add_reaction("⏫")
             await msg.add_reaction("✅")
             await msg.add_reaction("⚫")
             await msg.add_reaction("❌")
+            await msg.add_reaction("⏬")
             done = False
             traderAgree = False
             tradeeAgree = False
+            
             def checkR(reaction, user):
               if not user.bot:
                 if reaction.message == msg:
-                  if str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌":
+                  asyncio.create_task(reaction.remove(user))
+                  if str(reaction.emoji) in ["⏫","⏬","✅","❌"]:
                     if user.id == message.author.id or user.id == tradee.id:
-                      asyncio.create_task(reaction.remove(user))
                       return True
   
             user2 = ""
+            
             while True:
               reaction, user = await client.wait_for('reaction_add', check=checkR)
+
+              embed2 = discord.Embed(description="\n".join(displayedTrader)+"\n"+"".join(scrapTrader)+scrapEmoji+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+"".join(scrapTradee)+scrapEmoji+"\n"+"\n".join(displayedTradee))
+              embed2.set_author(name=message.author.name+(" -- [✅ Agreed]" if traderAgree else ""), icon_url=message.author.avatar_url)
+              embed2.set_footer(text=tradee.name+(" -- [✅ Agreed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
+              embed2.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
+
+              reactor = user
+              def check2(m):
+                error = ""
+                if not m.author.bot:
+                  if m.author.id == reactor.id:
+                    scrap = db["players"][str(m.author.id)]["scrap"]
+                    if m.content.isnumeric():
+                      guild1, count1 = getItem(m.author.id, int(m.content))
+                      if guild1 != False:
+                        i = guild1+"|"+str(count1)
+                        splits = db["players"][str(m.author.id)][guild1][count1-1].split("|")
+                        addItem = "`"+m.content+"` "+emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+                        if m.author.id == message.author.id:
+                          if guild1+"|"+str(count1) not in traderTrades:
+                            traderTrades.append(i)
+                            displayedTrader.append(addItem)
+                            asyncio.create_task(m.delete())
+                            return True
+                          else:
+                            error = "Item already in trade"
+                        elif m.author.id == tradee.id:
+                          if guild1+"|"+str(count1) not in tradeeTrades:
+                            tradeeTrades.append(i)
+                            displayedTradee.append(addItem)
+                            asyncio.create_task(m.delete())
+                            return True
+                          else:
+                            error = "Item already in trade"
+                      else:
+                        error = "Item does not exist"
+                    elif m.content.startswith("scrap"):
+                      if m.content[5:].isnumeric():
+                        if scrap >= int(m.content[5:]):
+                          if m.author.id == message.author.id:
+                            prev = int(scrapTrader[0])
+                            scrapTrader.pop(0)
+                            scrapTrader.append(str(prev+int(m.content[5:])))
+                          elif m.author.id == tradee.id:
+                            prev = int(scrapTradee[0])
+                            scrapTradee.pop(0)
+                            scrapTradee.append(str(prev+int(m.content[5:])))
+                          asyncio.create_task(m.delete())
+                          return True
+                        else:
+                          error = "You do not have enough scrap."
+                      else:
+                        error = "Scrap amount must be numeric"
+                    else:
+                      error = "Invalid ID or scrap"
+                    embed = discord.Embed(description="Enter the `ID` of the item you want to add.\nOr, type `scrap` followed by the amount.\n**"+error+"**")
+                    asyncio.create_task(m2.edit(embed=embed))
+                    asyncio.create_task(m.delete())
+                    
+              def check(m):
+                if not m.author.bot:
+                  if m.author.id == reactor.id:
+                    if m.content.isnumeric():
+                      guild1, count1 = getItem(m.author.id, int(m.content))
+                      if guild1 != False:
+                        i = guild1+"|"+str(count1)
+                        splits = db["players"][str(m.author.id)][guild1][count1-1].split("|")
+                        addItem = "`"+m.content+"` "+emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+                        if m.author.id == message.author.id:
+                          if guild1+"|"+str(count1) in traderTrades:
+                            traderTrades.remove(i)
+                            displayedTrader.remove(addItem)
+                            asyncio.create_task(m.delete())
+                            return True
+                          else:
+                            error = "Item not in trade"
+                        elif m.author.id == tradee.id:
+                          if guild1+"|"+str(count1) in tradeeTrades:
+                            tradeeTrades.remove(i)
+                            displayedTradee.remove(addItem)
+                            asyncio.create_task(m.delete())
+                            return True
+                          else:
+                            error = "Item not in trade"
+                    elif m.content.startswith("scrap"):
+                      if m.content[5:].isnumeric():
+                        if m.author.id == message.author.id:
+                          if int(scrapTrader[0]) >= int(m.content[5:]):
+                            prev = int(scrapTrader[0])
+                            scrapTrader.pop(0)
+                            scrapTrader.append(str(prev-int(m.content[5:])))
+                            asyncio.create_task(m.delete())
+                            return True
+                          else:
+                            error = "Not enough scrap in trade"
+                        elif m.author.id == tradee.id:
+                          if int(scrapTradee[0]) >= int(m.content[5:]):
+                            prev = int(scrapTradee[0])
+                            scrapTradee.pop(0)
+                            scrapTradee.append(str(prev-int(m.content[5:])))
+                            asyncio.create_task(m.delete())
+                            return True
+                          else:
+                            error = "Not enough scrap in trade"
+                      else:
+                        error = "Scrap amount must be numeric"
+                    else:
+                      error = "Invalid ID or scrap"
+                    embed = discord.Embed(description="Enter the `ID` of the item you want to remove.\nOr, type `scrap` followed by the amount.\n**"+error+"**")
+                    asyncio.create_task(m2.edit(embed=embed))
+                    asyncio.create_task(m.delete())
               
               if str(reaction.emoji) == "✅":
                 if user.id == message.author.id:
@@ -854,12 +968,42 @@ async def on_message(message):
                     user2 = user
                     break
                   tradeeAgree = False
-  
-              embed = discord.Embed(description=traderTrades+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+tradeeTrades)
-              embed.set_author(name=message.author.name+(" -- [✅ Agreed]" if traderAgree else ""), icon_url=message.author.avatar_url)
-              embed.set_footer(text=tradee.name+(" -- [✅ Agreed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
-              embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
-              await msg.edit(embed=embed)
+                  
+              #add item
+              elif str(reaction.emoji) == "⏫" and str(user.id) in db["players"]:
+                traderAgree = False
+                tradeeAgree = False
+                embed = discord.Embed(description="Enter the `ID` of the item you want to add.\nOr, type `scrap` followed by the amount.")
+                m2 = await message.channel.send(embed=embed)
+                embed2.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930749285463650354/pause.png")
+                await msg.edit(embed=embed2)
+                try:
+                  await client.wait_for('message', check=check2, timeout=10)
+                except asyncio.TimeoutError:
+                  pass
+
+                await m2.delete()
+                     
+              #remove item
+              elif str(reaction.emoji) == "⏬" and str(user.id) in db["players"]:
+                traderAgree = False
+                tradeeAgree = False
+                embed = discord.Embed(description="Enter the `ID` of the item you want to remove.\nOr, type `scrap` followed by the amount.")
+                m2 = await message.channel.send(embed=embed)
+                embed2.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930749285463650354/pause.png")
+                await msg.edit(embed=embed2)
+                try:
+                  await client.wait_for('message', check=check, timeout=10)
+                except asyncio.TimeoutError:
+                  pass
+
+                await m2.delete()
+
+              embed2 = discord.Embed(description="\n".join(displayedTrader)+"\n"+"".join(scrapTrader)+scrapEmoji+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+scrapEmoji.join(scrapTradee)+scrapEmoji+"\n"+"\n".join(displayedTradee))
+              embed2.set_author(name=message.author.name+(" -- [✅ Agreed]" if traderAgree else ""), icon_url=message.author.avatar_url)
+              embed2.set_footer(text=tradee.name+(" -- [✅ Agreed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
+              embed2.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930381037589135390/trading.png")
+              await msg.edit(embed=embed2)
                 
               if traderAgree and tradeeAgree:
                 done = True
@@ -867,15 +1011,44 @@ async def on_message(message):
            
             if done:
               await msg.clear_reactions()
-              embed = discord.Embed(description=traderTrades+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+tradeeTrades)
+              embed = discord.Embed(description="\n".join(displayedTrader)+"\n"+"".join(scrapTrader)+scrapEmoji+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+"".join(scrapTradee)+scrapEmoji+"\n"+"\n".join(displayedTradee))
               embed.set_author(name=message.author.name+(" -- [✅ Confirmed]" if traderAgree else ""), icon_url=message.author.avatar_url)
               embed.set_footer(text=tradee.name+(" -- [✅ Confirmed]" if tradeeAgree else ""), icon_url=tradee.avatar_url)
               embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930380635300823060/temp-removebg-preview.png")
               await msg.edit(embed=embed)
-              print("confirmed")
+              
+              if str(tradee.id) not in db["players"]:
+                db["players"][str(tradee.id)] = {"scrap":0}
+              if str(message.author.id) not in db["players"]:
+                db["players"][str(message.author.id)] = {"scrap":0}
+                
+              for x in traderTrades:
+                gi = x.split("|")
+                other = db["players"][str(message.author.id)][gi[0]]
+                if gi[0] not in db["players"][str(tradee.id)]:
+                  db["players"][str(tradee.id)][gi[0]] = []
+                db["players"][str(tradee.id)][gi[0]].append(other[int(gi[1])-1])
+                db["players"][str(message.author.id)][gi[0]].remove(other[int(gi[1])-1])
+                
+              for x in tradeeTrades:
+                gi = x.split("|")
+                other = db["players"][str(tradee.id)][gi[0]]
+                if gi[0] not in db["players"][str(tradee.id)]:
+                  db["players"][str(message.author.id)][gi[0]] = []
+                db["players"][str(message.author.id)][gi[0]].append(other[int(gi[1])-1])
+                db["players"][str(tradee.id)][gi[0]].remove(other[int(gi[1])-1])
+
+              if scrapTrader[0] != "0":
+                db["players"][str(tradee.id)]["scrap"] = db["players"][str(tradee.id)]["scrap"] + int(scrapTrader[0])
+                db["players"][str(message.author.id)]["scrap"] = db["players"][str(message.author.id)]["scrap"] - int(scrapTrader[0])
+                
+              if scrapTradee[0] != "0":
+                db["players"][str(tradee.id)]["scrap"] = db["players"][str(tradee.id)]["scrap"] - int(scrapTradee[0])
+                db["players"][str(message.author.id)]["scrap"] = db["players"][str(message.author.id)]["scrap"] + int(scrapTradee[0])
+                
             else:
               await msg.clear_reactions()
-              embed = discord.Embed(description=traderTrades+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+tradeeTrades)
+              embed = discord.Embed(description="\n".join(displayedTrader)+"\n"+"".join(scrapTrader)+scrapEmoji+"\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n"+"".join(scrapTradee)+scrapEmoji+"\n"+"\n".join(displayedTradee))
               embed.set_author(name=message.author.name+(" -- [🚫 Cancelled]" if user2.id==message.author.id else ""), icon_url=message.author.avatar_url)
               embed.set_footer(text=tradee.name+(" -- [🚫 Cancelled]" if user2.id==tradee.id else ""), icon_url=tradee.avatar_url)
               embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930394152309510184/images-removebg-preview.png")
