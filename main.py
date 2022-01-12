@@ -415,11 +415,11 @@ async def on_message(message):
               guild2, count2 = getItem(message.author.id, int(splits[2]))
               if guild2 != False:
                 if guild1 == guild2:
-                  db["players"][str(message.author.id)][guild1].insert(count2-1, db["players"][str(message.author.id)][guild1][count1-1])
-
-                  item1 = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+                  insertItem = db["players"][str(message.author.id)][guild1][count1-1]
+                  db["players"][str(message.author.id)][guild1].pop(count1-1)
+                  db["players"][str(message.author.id)][guild1].insert(count2-1, insertItem)           
+                  item1 = db["players"][str(message.author.id)][guild1][count2-1].split("|")
                   item1 = emojis[rarities.index(item1[1])] + item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
-
                   embed = discord.Embed(title="**Moved**",description=item1+"\n`"+splits[1]+"` ➡️ `"+splits[2]+"`")
                   await message.channel.send(embed=embed)
                 else:
