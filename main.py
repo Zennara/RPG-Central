@@ -94,6 +94,8 @@ multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 chestprice = 50
 rerollPrice = 25
 
+pageSize = 8
+
 def openChest():
   adj = adjectives[random.randint(0,len(adjectives)-1)]
   if random.randint(1,5) == 1:
@@ -316,52 +318,96 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
   #view bag
-  texts = ""
-  count = 0
-  scrapAmount = "0"
-  if messagecontent.startswith(prefix+"pocket") or messagecontent.startswith(prefix+"bag"):
-    #check if in database
-    if str(message.author.id) in db["players"]:
-      scrapAmount = str(db["players"][str(message.author.id)]["scrap"])
-      for guild in db["players"][str(message.author.id)]:
-        if guild != "scrap":
-          if db["players"][str(message.author.id)][guild]:
-            #get invite link
-            link = db[str(guild)]["name"]
-            try:
-              done = False
-              if db[str(message.guild.id)]["join"] == True:
-                g = client.get_guild(int(guild))
-                for invite in await g.invites():
-                  if invite.inviter.id == client.user.id:
-                    link = "["+g.name+"]("+invite.url+")"
-                    done = True
-                    break
-                if not done:
-                  inv = await g.text_channels[0].create_invite()
-                  link = "["+g.name+"]("+inv.url+")"
-            except:
-              pass
-            if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
-              texts = texts + "**" + link + "**\n"
-            elif messagecontent.startswith(prefix+"bag"):
-              texts = texts + "**" + link + "**\n"
-            for item in db["players"][str(message.author.id)][guild]:
-              count +=1
-              sections = item.split("|")
-              if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
-                continue
-              texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
-            texts = texts + "\n"
-    if texts.strip() == "":
-      texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
-    #webhook = await getWebhook(message.channel)
-    #add scrap
-    texts = scrapEmoji + " **Scrap:** "+ scrapAmount +"\n\n"+ texts
-    embed = discord.Embed(description=texts, color=0x000000)
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
-    embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
-    await message.channel.send(embed=embed)
+  page = 1
+  if messagecontent == prefix+"pocket" or messagecontent == prefix+"bag":
+    async def openBag(msg, page):
+      texts = ""
+      count = 0
+      itemsOnPage = 0
+      scrapAmount = "0"
+      #check if in database
+      if str(message.author.id) in db["players"]:
+        scrapAmount = str(db["players"][str(message.author.id)]["scrap"])
+        for guild in db["players"][str(message.author.id)]:
+          if itemsOnPage >= 8:
+            break
+          if guild != "scrap":
+            if db["players"][str(message.author.id)][guild]:
+              #get invite link
+              link = db[str(guild)]["name"]
+              try:
+                done = False
+                if db[str(message.guild.id)]["join"] == True:
+                  g = client.get_guild(int(guild))
+                  for invite in await g.invites():
+                    if invite.inviter.id == client.user.id:
+                      link = "["+g.name+"]("+invite.url+")"
+                      done = True
+                      break
+                  if not done:
+                    inv = await g.text_channels[0].create_invite()
+                    link = "["+g.name+"]("+inv.url+")"
+              except:
+                pass
+              if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
+                texts = texts + "**" + link + "**\n"
+              elif messagecontent.startswith(prefix+"bag"):
+                texts = texts + "**" + link + "**\n"
+              for item in db["players"][str(message.author.id)][guild]:
+                if itemsOnPage >= 8:
+                  break
+                count +=1
+                itemsOnPage += 1
+                sections = item.split("|")
+                if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
+                  continue
+                texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
+              texts = texts + "\n"
+      if texts.strip() == "":
+        texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
+      #webhook = await getWebhook(message.channel)
+      #add scrap
+      texts = scrapEmoji + " **Scrap:** "+ scrapAmount +"\n\n"+ texts
+      embed = discord.Embed(description=texts, color=0x000000)
+      embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
+      embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
+      await msg.edit(embed=embed)
+
+      if itemsOnPage >= 8:
+        await msg.add_reaction("➡️")
+        if page != 1:
+          await msg.add_reaction("⬅️")
+
+      def check(reaction, user):
+        if not user.bot:
+          if reaction.message == msg:
+            if user.id == message.author.id:
+              if str(reaction.emoji) == "⬅️":
+                if page != 1:
+                  asyncio.create_task(reaction.message.clear_reactions())
+                  return True
+              elif str(reaction.emoji) == "➡️":
+                asyncio.create_task(reaction.message.clear_reactions())
+                return True
+
+      try:
+        reaction, user = await client.wait_for('reaction_add', check=check, timeout=30)
+      except asyncio.TimeoutError:
+        await msg.clear_reactions()
+      else:
+        if str(reaction.emoji) == "⬅️":
+          if page != 1:
+            await openBag(msg,page-1)
+        elif str(reaction.emoji) == "➡️":
+          await openBag(msg,page+1)
+          
+
+    embed = discord.Embed(color=0x000000,description="🎒 **Opening "+message.author.name+"'s "+("Bag" if messagecontent==prefix+"bag" else "Pocket")+". . .**")
+    msg = await message.channel.send(embed=embed)
+    if messagecontent == prefix+"bag":
+      await openBag(msg,page)
+    else:
+      await openBag(msg, page)
 
   #delete item
   if messagecontent.startswith(prefix+"delete"):
@@ -421,23 +467,26 @@ async def on_message(message):
           if message.guild.get_member(int(mbr)):
             mbr = message.guild.get_member(int(mbr))
             guild1, count1 = getItem(message.author.id, int(splits[2]))
-            if guild1 != False:
-              item = db["players"][str(message.author.id)][guild1][count1-1]
-              del db["players"][str(message.author.id)][guild1][count1-1]
-              if str(mbr.id) not in db["players"]:
-                db["players"][str(mbr.id)] = {}
-                db["players"][str(mbr.id)]["scrap"] = 0
-              if guild1 not in db["players"][str(mbr.id)]:
-                db["players"][str(mbr.id)][guild1] = []
-              db["players"][str(mbr.id)][guild1].append(item)
-              splits = item.split("|")
-              item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
-              embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
-              embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
-              embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
-              await message.channel.send(embed=embed)
+            if str(message.author.id) in db["players"]:
+              if guild1 != False:
+                item = db["players"][str(message.author.id)][guild1][count1-1]
+                del db["players"][str(message.author.id)][guild1][count1-1]
+                if str(mbr.id) not in db["players"]:
+                  db["players"][str(mbr.id)] = {}
+                  db["players"][str(mbr.id)]["scrap"] = 0
+                if guild1 not in db["players"][str(mbr.id)]:
+                  db["players"][str(mbr.id)][guild1] = []
+                db["players"][str(mbr.id)][guild1].append(item)
+                splits = item.split("|")
+                item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
+                embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
+                embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
+                embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
+                await message.channel.send(embed=embed)
+              else:
+                await error(message, "Item does not exist.")
             else:
-              await error(message, "Item does not exist.")
+              await error(message, "You have no items to give.")
           else:
             await error(message, "Member not in the guild.")
         else:
@@ -493,41 +542,44 @@ async def on_message(message):
     splits = messagecontent.split()
     if len(splits) == 2:
       if splits[1].isnumeric():
-        guild1, count1 = getItem(message.author.id, int(splits[1]))
-        if guild1 != False:
-          splits = db["players"][str(message.author.id)][guild1][count1-1].split("|")
-          scrapItem = emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
-          scrapAmount = scrapAmounts[rarities.index(splits[1])] * multipliers[int(splits[4].replace("+",""))]
-          embed = discord.Embed(color=0xff0000, description=scrapItem, title="⚠️ Are you sure you want to **scrap** this item for "+ str(scrapAmount) +scrapEmoji +"?")
-          msg = await message.channel.send(embed=embed)
-          done = False
-          def checkR(reaction, user):
-            if not user.bot and user.id == message.author.id:
-              if reaction.message == msg:
-                if str(reaction.emoji) == "✅":
-                  asyncio.create_task(reaction.message.clear_reactions())
-                  return True
-                elif str(reaction.emoji) == "❌":
-                  asyncio.create_task(reaction.message.clear_reactions())
-                  return True
-          await msg.add_reaction("✅")
-          await msg.add_reaction("⚫")
-          await msg.add_reaction("❌")
-          while True:
-            reaction, user = await client.wait_for('reaction_add', check=checkR)
-            if str(reaction.emoji) == "✅":
-              break
-            if str(reaction.emoji) == "❌":
-              done = True
-              break
-          if not done:
-            del db["players"][str(message.author.id)][guild1][count1-1]
-            db["players"][str(message.author.id)]["scrap"] += scrapAmount
-            embed = discord.Embed(description=scrapItem,color=0x000000,title="⚙️ Item was scrapped for "+ str(scrapAmount) +scrapEmoji)
-            await msg.edit(embed=embed)
+        if str(message.author.id) in db["players"]:
+          guild1, count1 = getItem(message.author.id, int(splits[1]))
+          if guild1 != False:
+            splits = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+            scrapItem = emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+            scrapAmount = scrapAmounts[rarities.index(splits[1])] * multipliers[int(splits[4].replace("+",""))]
+            embed = discord.Embed(color=0xff0000, description=scrapItem, title="⚠️ Are you sure you want to **scrap** this item for "+ str(scrapAmount) +scrapEmoji +"?")
+            msg = await message.channel.send(embed=embed)
+            done = False
+            def checkR(reaction, user):
+              if not user.bot and user.id == message.author.id:
+                if reaction.message == msg:
+                  if str(reaction.emoji) == "✅":
+                    asyncio.create_task(reaction.message.clear_reactions())
+                    return True
+                  elif str(reaction.emoji) == "❌":
+                    asyncio.create_task(reaction.message.clear_reactions())
+                    return True
+            await msg.add_reaction("✅")
+            await msg.add_reaction("⚫")
+            await msg.add_reaction("❌")
+            while True:
+              reaction, user = await client.wait_for('reaction_add', check=checkR)
+              if str(reaction.emoji) == "✅":
+                break
+              if str(reaction.emoji) == "❌":
+                done = True
+                break
+            if not done:
+              del db["players"][str(message.author.id)][guild1][count1-1]
+              db["players"][str(message.author.id)]["scrap"] += scrapAmount
+              embed = discord.Embed(description=scrapItem,color=0x000000,title="⚙️ Item was scrapped for "+ str(scrapAmount) +scrapEmoji)
+              await msg.edit(embed=embed)
+            else:
+              embed = discord.Embed(description="❌ Scrap cancelled.",color=0x000000)
+              await msg.edit(embed=embed)
           else:
-            embed = discord.Embed(description="❌ Scrap cancelled.",color=0x000000)
-            await msg.edit(embed=embed)
+            await error(message, "You have no items to scrap.")
         else:
           await error(message, "Item does not exist.")
       else:
@@ -817,7 +869,6 @@ async def on_message(message):
 @client.event
 async def on_guild_join(guild):
   db[str(guild.id)] = {"prefix": "!", "name" : guild.name, "join" : False} #for database support
-  db["players"] = {}
 
 @client.event
 async def on_guild_update(before, after):
