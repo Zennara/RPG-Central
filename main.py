@@ -144,8 +144,6 @@ async def on_message(message):
   if message.author.bot:
     return
 
-  global cooldowns
-
   #convert the message to all lowercase
   messagecontent = message.content.lower()
 
@@ -154,12 +152,12 @@ async def on_message(message):
     db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
 
   #this will clear the database if something is broken, WARNING: will delete all entries
-  if messagecontent == "!clear":
-    for key in db.keys():
-      del db[key]
+  #if messagecontent == "!clear":
+  #  for key in db.keys():
+  #    del db[key]
     #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
-    db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
-    db["players"] = {}
+  #  db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
+  #  db["players"] = {}
 
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
