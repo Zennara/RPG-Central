@@ -602,18 +602,18 @@ async def on_message(message):
 
     boughtItem = ""
     price = ""
-    items = []
+    shopItems = []
     prices = []
     await msg.add_reaction("❌")
     for x in range(len(msg.embeds[0].fields)):      
-      items.append(" ".join(msg.embeds[0].fields[x].name.split()[1:-2]))
+      shopItems.append(" ".join(msg.embeds[0].fields[x].name.split()[1:-2]))
       prices.append(" ".join(msg.embeds[0].fields[x].name.split()[-1:]))
       await msg.add_reaction(numbers[x])  
 
     while True:
       reaction, user = await client.wait_for('reaction_add', check=checkR)
       if str(reaction.emoji) in shopAmount:
-        boughtItem = items[numbers.index(str(reaction.emoji))]
+        boughtItem = shopItems[numbers.index(str(reaction.emoji))]
         price = prices[numbers.index(str(reaction.emoji))]
         if scrap >= int(price[:-1]):
           db["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-1])
