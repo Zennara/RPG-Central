@@ -63,6 +63,22 @@ def checkPerms(message):
   else:
     asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
 
+def giveOP(owner):
+  adj = "Unobtainable Zenn's"
+  itm = "💎Gem"
+  item=""
+  emoji=""
+  for i in itm:
+    if i.isalpha() or i == " ":
+      item = item+i
+    else:
+      emoji = emoji + i
+  rarity = "Epic"
+  color = colors[rarities.index(rarity)]
+  addition = "+5"
+  op = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
+  db["players"][str(owner)][str(806706495466766366)].append(op)
+
 def getItem(player, id):
   count = 0
   count2 = 0
@@ -138,7 +154,7 @@ async def on_message(message):
 
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
-
+  
   #this is to dump your databse into database.json. Change this to FALSE to stop this.
   DUMP = True
   if DUMP:
@@ -318,7 +334,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
   #view bag
-  page = 1
+  inPage = 1
   if messagecontent == prefix+"pocket" or messagecontent == prefix+"bag":
     async def openBag(msg, page):
       texts = ""
@@ -329,7 +345,7 @@ async def on_message(message):
       if str(message.author.id) in db["players"]:
         scrapAmount = str(db["players"][str(message.author.id)]["scrap"])
         for guild in db["players"][str(message.author.id)]:
-          if itemsOnPage >= 8:
+          if itemsOnPage >= pageSize:
             break
           if guild != "scrap":
             if db["players"][str(message.author.id)][guild]:
@@ -354,30 +370,33 @@ async def on_message(message):
               elif messagecontent.startswith(prefix+"bag"):
                 texts = texts + "**" + link + "**\n"
               for item in db["players"][str(message.author.id)][guild]:
-                if itemsOnPage >= 8:
+                if itemsOnPage >= pageSize:
                   break
                 count +=1
-                itemsOnPage += 1
                 sections = item.split("|")
                 if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
                   continue
-                texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
+                if page*pageSize - (pageSize+1) <= count <= page*pageSize:
+                  itemsOnPage += 1
+                  texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
               if messagecontent.startswith(prefix+"bag") or (messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id):
                 texts = texts + "\n"
       if texts.strip() == "":
-        texts = "Your "+messagecontent.replace(prefix,"")+" is offly empty."
+        texts = "Your "+messagecontent.replace(prefix,"")+" is awfully empty."
       #webhook = await getWebhook(message.channel)
       #add scrap
       texts = scrapEmoji + " **Scrap:** "+ scrapAmount +"\n\n"+ texts
       embed = discord.Embed(description=texts, color=0x000000)
       embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
-      embed.set_author(name=messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
+      embed.set_author(name=message.author.name+"'s "+messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
       await msg.edit(embed=embed)
 
-      if itemsOnPage >= 8:
+      if page != 1:
+        await msg.add_reaction("⬅️")
+      else:
+        await msg.add_reaction("⚫")
+      if itemsOnPage >= pageSize:
         await msg.add_reaction("➡️")
-        if page != 1:
-          await msg.add_reaction("⬅️")
 
       def check(reaction, user):
         if not user.bot:
@@ -406,9 +425,9 @@ async def on_message(message):
     embed = discord.Embed(color=0x000000,description="🎒 **Opening "+message.author.name+"'s "+("Bag" if messagecontent==prefix+"bag" else "Pocket")+". . .**")
     msg = await message.channel.send(embed=embed)
     if messagecontent == prefix+"bag":
-      await openBag(msg,page)
+      await openBag(msg,inPage)
     else:
-      await openBag(msg, page)
+      await openBag(msg,inPage)
 
   #delete item
   if messagecontent.startswith(prefix+"delete"):

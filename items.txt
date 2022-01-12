@@ -91,7 +91,7 @@
 🥧Pie
 🍫Chocolate Bar
 🍬Candy
-🍭Lollipop
+🍭LollWineipop
 🍮Custard
 🍯Honey Pot
 🍼Bottle
@@ -100,8 +100,7 @@
 🫖Teapot
 🍵Green Tea
 🍶Sake
-🍾Champagne
-🍷
+🍾Champagne🍷
 🍸Cocktail
 🍹Tropical Drink
 🍺Beer
