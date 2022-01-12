@@ -93,6 +93,8 @@ multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 
 def openChest():
   adj = adjectives[random.randint(0,len(adjectives)-1)]
+  if random.randint(1,5) == 1:
+    adj = adj +" "+ adjectives[random.randint(0,len(adjectives)-1)]
   itm = items[random.randint(0,len(items)-1)]
   item=""
   emoji=""
@@ -400,6 +402,41 @@ async def on_message(message):
         await error(message, "Item ID must be numeric.")
     else:
       await error(message, "Please specify the item ID.")
+
+  #move an item in your bag
+  if messagecontent.startswith(prefix+"move"):
+    pass
+
+  #swap two items in your bag
+  if messagecontent.startswith(prefix+"swap"):
+    splits = messagecontent.split()
+    if len(splits) == 3:
+      if splits[1].isnumeric():
+        if splits[2].isnumeric():
+          if str(message.author.id) in db["players"]:
+            guild1, count1 = getItem(message.author.id, int(splits[1]))
+            if guild1 != False:
+              guild2, count2 = getItem(message.author.id, int(splits[2]))
+              if guild2 != False:
+                item1 = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+                item1 = "`"+splits[1]+"` "+emojis[rarities.index(item1[1])] + item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
+                item2 = db["players"][str(message.author.id)][guild2][count2-1].split("|")
+                item2 = "`"+splits[2]+"` "+emojis[rarities.index(item2[1])] + item2[0] +" **["+ item2[1] +"]** "+ item2[2] +" "+ item2[3] +" "+ item2[4]
+                db["players"][str(message.author.id)][guild1][count1-1],db["players"][str(message.author.id)][guild2][count2-1] = db["players"][str(message.author.id)][guild2][count2-1],db["players"][str(message.author.id)][guild1][count1-1]
+                embed = discord.Embed(description="**Swapped**\n" + item1 +"\n**with**\n" + item2)
+                await message.channel.send(embed=embed)
+              else:
+                await error(message, "Swapped item does not exist")
+            else:
+              await error(message, "Swapping item does not exist.")
+          else:
+            await error(message, "You do not have any items to swap.")
+        else:
+          await error(message, "The item you wish to swap with must be it's ID")
+      else:
+        await error(message, "The item you wish to swap must be it's ID")
+    else:
+      await error(message, "Please specify the two items you want to swap")
 
   #market
   if messagecontent == prefix+"shop":
