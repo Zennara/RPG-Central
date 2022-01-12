@@ -405,7 +405,24 @@ async def on_message(message):
 
   #move an item in your bag
   if messagecontent.startswith(prefix+"move"):
-    pass
+    splits = messagecontent.split()
+    if len(splits) == 3:
+      if splits[1].isnumeric():
+        if splits[2].isnumeric():
+          if str(message.author.id) in db["players"]:
+            guild1, count1 = getItem(message.author.id, int(splits[1]))
+            if guild1 != False:
+              db["players"]  
+            else:
+              await error(message, "Item does not exist.")
+          else:
+            await error(message, "You do not have any items.")
+        else:
+          await error(message, "Index is not a number.")
+      else:
+        await error(message, "Item ID needs to be a number.")
+    else:
+      await error(message, "Input needs to have item ID and index to move to.")
 
   #swap two items in your bag
   if messagecontent.startswith(prefix+"swap"):
@@ -418,13 +435,16 @@ async def on_message(message):
             if guild1 != False:
               guild2, count2 = getItem(message.author.id, int(splits[2]))
               if guild2 != False:
-                item1 = db["players"][str(message.author.id)][guild1][count1-1].split("|")
-                item1 = "`"+splits[1]+"` "+emojis[rarities.index(item1[1])] + item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
-                item2 = db["players"][str(message.author.id)][guild2][count2-1].split("|")
-                item2 = "`"+splits[2]+"` "+emojis[rarities.index(item2[1])] + item2[0] +" **["+ item2[1] +"]** "+ item2[2] +" "+ item2[3] +" "+ item2[4]
-                db["players"][str(message.author.id)][guild1][count1-1],db["players"][str(message.author.id)][guild2][count2-1] = db["players"][str(message.author.id)][guild2][count2-1],db["players"][str(message.author.id)][guild1][count1-1]
-                embed = discord.Embed(description="**Swapped**\n" + item1 +"\n**with**\n" + item2)
-                await message.channel.send(embed=embed)
+                if guild1 == guild2:
+                  item1 = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+                  item1 = "`"+splits[1]+"` "+emojis[rarities.index(item1[1])] + item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
+                  item2 = db["players"][str(message.author.id)][guild2][count2-1].split("|")
+                  item2 = "`"+splits[2]+"` "+emojis[rarities.index(item2[1])] + item2[0] +" **["+ item2[1] +"]** "+ item2[2] +" "+ item2[3] +" "+ item2[4]
+                  db["players"][str(message.author.id)][guild1][count1-1],db["players"][str(message.author.id)][guild2][count2-1] = db["players"][str(message.author.id)][guild2][count2-1],db["players"][str(message.author.id)][guild1][count1-1]
+                  embed = discord.Embed(description="**Swapped**\n" + item1 +"\n**with**\n" + item2)
+                  await message.channel.send(embed=embed)
+                else:
+                  await error(message, "Cannot swap items from two different servers.")
               else:
                 await error(message, "Swapped item does not exist")
             else:
