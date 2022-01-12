@@ -433,13 +433,13 @@ async def on_message(message):
     scrap = 0
     if str(message.author.id) in db["players"]:
       scrap = db["players"][str(message.author.id)]["scrap"]
-    embed2 = discord.Embed(description="Welcome to the shop.\n-------------------------")
+    embed2 = discord.Embed(description="Welcome to the shop. React with the corresponding number to buy an item.\n-------------------------")
     embed2.set_author(name="🛒 Marketplace")
 
     #items
     embed2.add_field(name="1️⃣ Item Chest | "+"15"+scrapEmoji, value="A common chest containing an item.", inline=False)
     
-    embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
+    embed2.set_footer(text="-----------------------\nScrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
     msg = await message.channel.send(embed=embed2)
 
     numbers = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
