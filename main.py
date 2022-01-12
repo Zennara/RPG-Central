@@ -162,21 +162,7 @@ async def on_message(message):
 
   #generate item manually
   if messagecontent == prefix+"gen":
-    adj = adjectives[random.randint(0,len(adjectives)-1)]
-    itm = items[random.randint(0,len(items)-1)]
-    item=""
-    emoji=""
-    for i in itm:
-      if i.isalpha() or i == " ":
-        item = item+i
-      else:
-        emoji = emoji + i
-    rarity = random.choices(rarities,chances)[0]
-    color = colors[rarities.index(rarity)]
-
-    addition = random.choices(additives,additiveChances)[0]
-    
-    desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+    desc, color, fullItem = openChest()
     #send message
     embed = discord.Embed(description=desc, color=color)
     await message.channel.send(embed=embed)
@@ -197,19 +183,7 @@ async def on_message(message):
           
       reaction, user = await client.wait_for('reaction_add', check=check)
   
-      adj = adjectives[random.randint(0,len(adjectives)-1)]
-      itm = items[random.randint(0,len(items)-1)]
-      item=""
-      emoji=""
-      for i in itm:
-        if i.isalpha() or i == " ":
-          item = item+i
-        else:
-          emoji = emoji + i
-      rarity = random.choices(rarities,chances)[0]
-      color = colors[rarities.index(rarity)]
-      addition = random.choices(additives,additiveChances)[0]
-      desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+      desc, color, fullItem = openChest()
       embed = discord.Embed(description=desc, color=color) 
       embed.set_author(name=user.name+" Opened:", icon_url=user.avatar_url)
       await msg.edit(embed=embed)
@@ -222,7 +196,6 @@ async def on_message(message):
         db["players"][str(user.id)][str(message.guild.id)] = []
   
       #give item
-      fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
 
   #view bag
