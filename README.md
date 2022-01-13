@@ -33,8 +33,8 @@ If you enjoy this free bot, it would mean the world to [donate](https://paypal.m
 | `public`    | none            | Change the server to public in the bot                           | no          |
 
 ## Bot Owner Commands
-|  **Command**  | **Arguments**     | **Description**                                                  | **Public?** |
-|---------------|-------------------|------------------------------------------------------------------|-------------|
-| `testgen`     | none              | Tests item generation                                            | no          |
-| `gen`         | `<item>`          | Generates an item in `emoji\|rarity\|adj\|noun\|additive` format | no          |
-| `chest`       | none              | Spawns a chest                                                   | no          |
+|  **Command**  | **Arguments**     | **Description**                                                    | **Public?** |
+|---------------|-------------------|--------------------------------------------------------------------|-------------|
+| `testgen`     | none              | Tests item generation                                              | no          |
+| `gen`         | `<item>`          | Generates an item from `emoji\|rarity\|adj\|noun\|additive` format | no          |
+| `chest`       | none              | Spawns a chest                                                     | no          |
