@@ -118,6 +118,9 @@ chestChanceMAX = 100
 
 pageSize = 8
 
+def spawnItem():
+  pass
+
 async def checkZen(message):
   if message.author.id == (await client.application_info()).owner.id:
     return True
@@ -156,16 +159,19 @@ async def on_message(message):
   if str(message.guild.id) not in db:
     db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
 
-  #this will clear the database if something is broken, WARNING: will delete all entries
-  #if messagecontent == "!clear":
-  #  for key in db.keys():
-  #    del db[key]
-    #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
-  #  db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
-  #  db["players"] = {}
-
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
+
+  #this will clear the database if something is broken, WARNING: will delete all entries
+  if messagecontent == prefix+"clear":
+    if await checkZen(message):
+      for key in db.keys():
+        del db[key]
+      #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
+      db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
+      db["players"] = {}
+      embed = discord.Embed(description="🆑 **Database was cleared**")
+      await message.channel.send(embed=embed)
   
   #this is to dump your databse into database.json. Change this to FALSE to stop this.
   DUMP = True
@@ -274,7 +280,7 @@ async def on_message(message):
 
   #help for each command
   elif messagecontent.startswith(prefix+"help"):
-    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","give","delete","private","public"]
+    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","","delete","private","public"]
     if messagecontent.split()[1] in commands:
       cmd = commands.index(messagecontent.split()[1])
       if cmd==0:
