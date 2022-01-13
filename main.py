@@ -221,7 +221,7 @@ async def on_message(message):
         if guild1 != False:
           item = db["players"][str(message.author.id)][guild1][count1-1]
           splits = item.split("|")
-          item = splits[0] +" **["+ splits[1] +"** "+ splits[2] +" "+ splits[3] +" "+ splits[4]
+          item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+ splits[4]
           color = colors[rarities.index(splits[1])]
           brag = showoffs[random.randint(0, len(showoffs)-1)]
           embed = discord.Embed(description=item,color=color)
