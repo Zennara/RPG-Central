@@ -235,8 +235,8 @@ async def on_message(message):
     
   #chest manually
   #if messagecontent == prefix+"chest":
-    #if checkPerms(message):
-      #await spawnChest()
+  #  if checkPerms(message):
+  #    await spawnChest()
   
   if random.randint(1, chestChanceMAX) == 1:
     await spawnChest()
@@ -355,101 +355,116 @@ async def on_message(message):
 
   #view bag
   inPage = 1
-  if messagecontent == prefix+"pocket" or messagecontent == prefix+"bag":
-    async def openBag(msg, page):
-      texts = ""
-      count = 0
-      itemsOnPage = 0
-      scrapAmount = "0"
-      #check if in database
-      if str(message.author.id) in db["players"]:
-        scrapAmount = str(db["players"][str(message.author.id)]["scrap"])
-        for guild in db["players"][str(message.author.id)]:
-          if itemsOnPage >= pageSize:
-            break
-          if guild != "scrap" and guild != "trading":
-            if db["players"][str(message.author.id)][guild]:
-              if page*pageSize - (pageSize)  <= count <= page*pageSize:
-                #get invite link
-                link = db[str(guild)]["name"]
-                try:
-                  done = False
-                  if db[str(guild)]["join"] == True:
-                    g = client.get_guild(int(guild))
-                    for invite in await g.invites():
-                      if invite.inviter.id == client.user.id:
-                        link = "["+g.name+"]("+invite.url+")"
-                        done = True
-                        break
-                    if not done:
-                      inv = await g.text_channels[0].create_invite()
-                      link = "["+g.name+"]("+inv.url+")"
-                except:
-                  pass
-                if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
-                  texts = texts + "**" + link + "**\n"
-                elif messagecontent.startswith(prefix+"bag"):
-                  texts = texts + "**" + link + "**\n"
-                
-              for item in db["players"][str(message.author.id)][guild]:
-                if itemsOnPage >= pageSize:
-                  break
-                count +=1
-                sections = item.split("|")
-                if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
-                  continue
-                if page*pageSize - (pageSize)+1 <= count <= page*pageSize:
-                  itemsOnPage += 1
-                  texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
-              if messagecontent.startswith(prefix+"bag") or (messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id):
-                texts = texts + "\n"
-      if texts.strip() == "":
-        texts = "Your "+messagecontent.replace(prefix,"")+" is awfully empty."
-      #webhook = await getWebhook(message.channel)
-      #add scrap
-      texts = scrapEmoji + " **Scrap:** "+ scrapAmount +"\n\n"+ texts
-      embed = discord.Embed(description=texts, color=0x000000)
-      embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
-      embed.set_author(name=message.author.name+"'s "+messagecontent.replace(prefix,"").capitalize(), icon_url=message.author.avatar_url)
-      await msg.edit(embed=embed)
-
-      if page != 1:
-        await msg.add_reaction("⬅️")
+  if messagecontent.startswith(prefix+"pocket") or messagecontent.startswith(prefix+"bag"):
+    splits = messagecontent.split(" ", 1)
+    usr = ""
+    if len(splits) == 1:
+      usr = message.author
+    else:
+      sp = splits[1].replace(">","").replace("<","").replace("@","").replace("!","")
+      if sp.isnumeric():
+        if message.guild.get_member(int(sp)):
+          usr = message.guild.get_member(int(sp))
+        else:
+          await error(message, "Member does not exist or is not in the guild")
       else:
-        await msg.add_reaction("⚫")
-      if itemsOnPage >= pageSize:
-        await msg.add_reaction("➡️")
+        await error(message, "Member must be numeric ID or mention")
 
-      def check(reaction, user):
-        if not user.bot:
-          if reaction.message == msg:
-            if user.id == message.author.id:
-              if str(reaction.emoji) == "⬅️":
-                if page != 1:
+    if usr != "":
+      async def openBag(msg, page):
+        texts = ""
+        count = 0
+        itemsOnPage = 0
+        scrapAmount = "0"
+        #check if in database
+        if str(usr.id) in db["players"]:
+          scrapAmount = str(db["players"][str(usr.id)]["scrap"])
+          for guild in db["players"][str(usr.id)]:
+            if itemsOnPage >= pageSize:
+              break
+            if guild != "scrap" and guild != "trading":
+              if db["players"][str(usr.id)][guild]:
+                if page*pageSize - (pageSize)  <= count <= page*pageSize:
+                  #get invite link
+                  link = db[str(guild)]["name"]
+                  try:
+                    done = False
+                    if db[str(guild)]["join"] == True:
+                      g = client.get_guild(int(guild))
+                      for invite in await g.invites():
+                        if invite.inviter.id == client.user.id:
+                          link = "["+g.name+"]("+invite.url+")"
+                          done = True
+                          break
+                      if not done:
+                        inv = await g.text_channels[0].create_invite()
+                        link = "["+g.name+"]("+inv.url+")"
+                  except:
+                    pass
+                  if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
+                    texts = texts + "**" + link + "**\n"
+                  elif messagecontent.startswith(prefix+"bag"):
+                    texts = texts + "**" + link + "**\n"
+                  
+                for item in db["players"][str(usr.id)][guild]:
+                  if itemsOnPage >= pageSize:
+                    break
+                  count +=1
+                  sections = item.split("|")
+                  if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
+                    continue
+                  if page*pageSize - (pageSize)+1 <= count <= page*pageSize:
+                    itemsOnPage += 1
+                    texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
+                if messagecontent.startswith(prefix+"bag") or (messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id):
+                  texts = texts + "\n"
+        if texts.strip() == "":
+          texts = "Your "+splits[0].replace(prefix,"")+" is awfully empty."
+        #webhook = await getWebhook(message.channel)
+        #add scrap
+        texts = scrapEmoji + " **Scrap:** "+ scrapAmount +"\n\n"+ texts
+        embed = discord.Embed(description=texts, color=0x000000)
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/929182726203002920/930004332835930132/bag-removebg-preview_1.png")
+        embed.set_author(name=usr.name+"'s "+splits[0].replace(prefix,"").capitalize(), icon_url=usr.avatar_url)
+        await msg.edit(embed=embed)
+  
+        if page != 1:
+          await msg.add_reaction("⬅️")
+        else:
+          await msg.add_reaction("⚫")
+        if itemsOnPage >= pageSize:
+          await msg.add_reaction("➡️")
+  
+        def check(reaction, user):
+          if not user.bot:
+            if reaction.message == msg:
+              if user.id == usr.id:
+                if str(reaction.emoji) == "⬅️":
+                  if page != 1:
+                    asyncio.create_task(reaction.message.clear_reactions())
+                    return True
+                elif str(reaction.emoji) == "➡️":
                   asyncio.create_task(reaction.message.clear_reactions())
                   return True
-              elif str(reaction.emoji) == "➡️":
-                asyncio.create_task(reaction.message.clear_reactions())
-                return True
-
-      try:
-        reaction, user = await client.wait_for('reaction_add', check=check, timeout=30)
-      except asyncio.TimeoutError:
-        await msg.clear_reactions()
-      else:
-        if str(reaction.emoji) == "⬅️":
-          if page != 1:
-            await openBag(msg,page-1)
-        elif str(reaction.emoji) == "➡️":
-          await openBag(msg,page+1)
+  
+        try:
+          reaction, user = await client.wait_for('reaction_add', check=check, timeout=30)
+        except asyncio.TimeoutError:
+          await msg.clear_reactions()
+        else:
+          if str(reaction.emoji) == "⬅️":
+            if page != 1:
+              await openBag(msg,page-1)
+          elif str(reaction.emoji) == "➡️":
+            await openBag(msg,page+1)
           
 
-    embed = discord.Embed(color=0x000000,description="🎒 **Opening "+message.author.name+"'s "+("Bag" if messagecontent==prefix+"bag" else "Pocket")+". . .**")
-    msg = await message.channel.send(embed=embed)
-    if messagecontent == prefix+"bag":
-      await openBag(msg,inPage)
-    else:
-      await openBag(msg,inPage)
+      embed = discord.Embed(color=0x000000,description="🎒 **Opening "+usr.name+"'s "+("Bag" if messagecontent==prefix+"bag" else "Pocket")+". . .**")
+      msg = await message.channel.send(embed=embed)
+      if messagecontent == prefix+"bag":
+        await openBag(msg,inPage)
+      else:
+        await openBag(msg,inPage)
 
   #delete item
   if messagecontent.startswith(prefix+"delete"):
