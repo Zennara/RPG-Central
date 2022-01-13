@@ -99,7 +99,7 @@ def getItem(player, id):
   count2 = 0
   if str(player) in db["players"]:
     for guild in db["players"][str(player)]:
-      if guild not in nonGuilds:
+      if guild not in nonGuilds or guild == "items":
         count2 = 0
         for item in db["players"][str(player)][guild]:
           count += 1
@@ -230,10 +230,19 @@ async def on_message(message):
       if splits[1].isnumeric():
         guild1, count1 = getItem(message.author.id, int(splits[1]))
         if guild1 != False:
+          print(guild1)
+          print(count1)
           item = db["players"][str(message.author.id)][guild1][count1-1]
           splits = item.split("|")
-          item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+ splits[4]
-          color = colors[rarities.index(splits[1])]
+          if len(splits) == 5:
+            item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+ splits[4]
+            color = colors[rarities.index(splits[1])]
+          else:
+            type=""
+            if guild1 == "items":
+              type = "Paintbrush 🖌️"
+            item = f"{splits[0]} {splits[1]} {type}"
+            color = 0x000000
           brag = showoffs[random.randint(0, len(showoffs)-1)]
           embed = discord.Embed(description=item,color=color)
           embed.set_author(name=f"{message.author.name} {brag}", icon_url=message.author.avatar_url)
