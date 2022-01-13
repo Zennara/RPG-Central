@@ -30,6 +30,7 @@ client = discord.Client(intents=intents)
 adjectives = []
 items = []
 encounters = []
+showoffs = []
 
 @client.event
 async def on_ready():
@@ -50,6 +51,11 @@ async def on_ready():
     encounter = file.readlines()
     global encounters
     encounters = [line.rstrip() for line in encounter]
+  #showoffs
+  with open("showoffs.txt") as file:
+    showoff = file.readlines()
+    global showoffs
+    showoffs = [line.rstrip() for line in showoff]
 
   #reset trading
   for member in db["players"]:
@@ -86,14 +92,15 @@ def giveOP(owner):
 def getItem(player, id):
   count = 0
   count2 = 0
-  for guild in db["players"][str(player)]:
-    if guild != "scrap" and guild != "trading":
-      count2 = 0
-      for item in db["players"][str(player)][guild]:
-        count += 1
-        count2 += 1
-        if id == count:
-          return guild, count2
+  if str(player) in db["players"]:
+    for guild in db["players"][str(player)]:
+      if guild != "scrap" and guild != "trading":
+        count2 = 0
+        for item in db["players"][str(player)][guild]:
+          count += 1
+          count2 += 1
+          if id == count:
+            return guild, count2
   return False, False
 
 #chances, from common to legendary, left to right
@@ -204,6 +211,28 @@ async def on_message(message):
           await error(message, "Prefix must be between `1` and `3` characters.")
       else:
         await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@` , ` `")
+
+  #showoff commands
+  if messagecontent.startswith(prefix+"showoff"):
+    splits = messagecontent.split(" ", 1)
+    if len(splits) == 2:
+      if splits[1].isnumeric():
+        guild1, count1 = getItem(message.author.id, int(splits[1]))
+        if guild1 != False:
+          item = db["players"][str(message.author.id)][guild1][count1-1]
+          splits = item.split("|")
+          item = splits[0] +" **["+ splits[1] +"** "+ splits[2] +" "+ splits[3] +" "+ splits[4]
+          color = colors[rarities.index(splits[1])]
+          brag = showoffs[random.randint(0, len(showoffs)-1)]
+          embed = discord.Embed(description=item,color=color)
+          embed.set_author(name=f"{message.author.name} {brag}", icon_url=message.author.avatar_url)
+          await message.channel.send(embed=embed)
+        else:
+          await error(message, "Item does not exist")
+      else:
+        await error(message, "Item ID must be numeric")
+    else:
+      await error(message, "Please specify the item ID to showoff")
 
   #generate item manually
   if messagecontent == prefix+"testgen":
@@ -318,6 +347,7 @@ async def on_message(message):
     `{prefix}bag` - Show all of your items
     `{prefix}pocket` - Show all your items from this server
     `{prefix}shop` - View the marketplace
+    `{prefix}showoff <id> - Brag about an item
     `{prefix}trade <member>` - Start a trade with another player
     `{prefix}distill <id>` - Change the adjective of your item
     `{prefix}transmute <id>` - Change the object of your item
@@ -335,7 +365,7 @@ async def on_message(message):
 
   #help for each command
   elif messagecontent.startswith(prefix+"help"):
-    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","","delete","private","public"]
+    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","","delete","private","public","showoff"]
     if messagecontent.split()[1] in commands:
       cmd = commands.index(messagecontent.split()[1])
       if cmd==0:
@@ -389,6 +419,10 @@ async def on_message(message):
       elif cmd==12:
         text=f"""
         Set your server to `public`. This **will allow** users from other guilds to join off items and bags. Only usable by members with the `Manage_Guild` permission.
+        """
+      elif cmd==13:
+        text=f"""
+        Shows off an item from the `id` and displays it in the channel along with a randomly generated message.
         """
 
       #send command
