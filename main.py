@@ -823,42 +823,45 @@ async def on_message(message):
         if splits[1].isnumeric():
           guild1, count1 = getItem(message.author.id, int(splits[1]))
           if guild1 != False:
-            if splits[0] == prefix+"distill" or splits[0] == prefix+"transmute":
-              scrap = db["players"][str(message.author.id)]["scrap"]
-              if scrap >= rerollPrice:
-                db["players"][str(message.author.id)]["scrap"] = scrap - rerollPrice
-                item=""
-                emoji=""
-                splitItem = db["players"][str(message.author.id)][guild1][count1-1].split("|")
-                adj = splitItem[2]
-                item = splitItem[3]
-                emoji = splitItem[0]
-                if splits[0] == prefix+"distill":
-                  adj = adjectives[random.randint(0,len(adjectives)-1)]
-                  if random.randint(1,5) == 1:
-                    adj = adj +" "+ adjectives[random.randint(0,len(adjectives)-1)]
-                elif splits[0] == prefix+"transmute":
-                  item = ""
-                  emoji = ""
-                  itm = items[random.randint(0,len(items)-1)]
-                  for i in itm:
-                    if i.isalpha() or i == " ":
-                      item = item+i
-                    else:
-                      emoji = emoji + i
-                rarity = splitItem[1]
-                color = colors[rarities.index(rarity)]
-                addition = splitItem[4]
-                desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
-                fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
-                db["players"][str(message.author.id)][guild1].insert(count1-1,fullItem)
-                db["players"][str(message.author.id)][guild1].pop(count1)
-                embed = discord.Embed(description=desc, title="Item "+ ("Distilled" if splits[0]==prefix+"distill" else "Transmuted") +" for "+str(rerollPrice)+" "+scrapEmoji, color=color)
-                await message.channel.send(embed=embed)
+            if guild1 != "items":
+              if splits[0] == prefix+"distill" or splits[0] == prefix+"transmute":
+                scrap = db["players"][str(message.author.id)]["scrap"]
+                if scrap >= rerollPrice:
+                  db["players"][str(message.author.id)]["scrap"] = scrap - rerollPrice
+                  item=""
+                  emoji=""
+                  splitItem = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+                  adj = splitItem[2]
+                  item = splitItem[3]
+                  emoji = splitItem[0]
+                  if splits[0] == prefix+"distill":
+                    adj = adjectives[random.randint(0,len(adjectives)-1)]
+                    if random.randint(1,5) == 1:
+                      adj = adj +" "+ adjectives[random.randint(0,len(adjectives)-1)]
+                  elif splits[0] == prefix+"transmute":
+                    item = ""
+                    emoji = ""
+                    itm = items[random.randint(0,len(items)-1)]
+                    for i in itm:
+                      if i.isalpha() or i == " ":
+                        item = item+i
+                      else:
+                        emoji = emoji + i
+                  rarity = splitItem[1]
+                  color = colors[rarities.index(rarity)]
+                  addition = splitItem[4]
+                  desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+                  fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
+                  db["players"][str(message.author.id)][guild1].insert(count1-1,fullItem)
+                  db["players"][str(message.author.id)][guild1].pop(count1)
+                  embed = discord.Embed(description=desc, title="Item "+ ("Distilled" if splits[0]==prefix+"distill" else "Transmuted") +" for "+str(rerollPrice)+" "+scrapEmoji, color=color)
+                  await message.channel.send(embed=embed)
+                else:
+                  await error(message, "You only have **"+str(scrap)+"** "+scrapEmoji)
               else:
-                await error(message, "You only have **"+str(scrap)+"** "+scrapEmoji)
+                await error(message, "Reroll type needs to be `adj` or `noun`")
             else:
-              await error(message, "Reroll type needs to be `adj` or `noun`")
+              await error(message, "You can not distill or transmute items.")
           else:
             await error(message, "Item does not exist")
         else:
