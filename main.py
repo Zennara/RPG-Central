@@ -11,7 +11,6 @@ import json #to write db to a json file
 import requests #to check discord   api for limits/bans
 from replit import db #database storage
 import random
-from datetime import datetime
 
 #api limit checker
 #rate limits occur when you access the api too much. You can view Discord.py's api below. There it will tell you whether an action will access the api.
