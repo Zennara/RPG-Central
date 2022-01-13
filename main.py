@@ -114,7 +114,7 @@ multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 chestprice = 50
 rerollPrice = 25
 
-chestChanceMAX = 100
+chestChanceMAX = 33
 
 pageSize = 8
 
