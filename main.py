@@ -817,6 +817,7 @@ async def on_message(message):
         except asyncio.TimeoutError:
           embed = discord.Embed(description="Looks like the shopkeeper got tired of waiting...",color=0xFF0000)
           await msg.edit(embed=embed)
+          await msg.clear_reactions()
           break
         else:
           if str(reaction.emoji) in shopAmount:
