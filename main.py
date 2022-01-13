@@ -11,6 +11,7 @@ import json #to write db to a json file
 import requests #to check discord   api for limits/bans
 from replit import db #database storage
 import random
+from datetime import datetime
 
 #api limit checker
 #rate limits occur when you access the api too much. You can view Discord.py's api below. There it will tell you whether an action will access the api.
@@ -62,6 +63,8 @@ async def on_ready():
   #reset trading
   for member in db["players"]:
     db["players"][str(member)]["trading"] = ""
+    #db["players"][str(member)]["items"] = []
+    #db["players"][str(member)]["shows"] = {}
 
 async def error(message, code):
   embed = discord.Embed(color=0xff0000, description=code)
@@ -121,6 +124,7 @@ scrapAmounts = [10,20,30,40,50]
 multipliers = [1 , 1.1 , 1.25 , 1.5 , 2]
 
 chestprice = 50
+brushPrice = 10
 rerollPrice = 25
 
 chestChanceMAX = 33
@@ -915,23 +919,46 @@ async def on_message(message):
     else:
       await error(message, f"Current active trade [here]({trading()})")
 
+  fixed = datetime(2022,1,12)
+  now = datetime.now()
+  delta = now - fixed
+  rand = random.Random((int(delta.seconds/3600))+(message.author.id))
+
+  adj = adjectives[rand.randint(0,len(adjectives)-1)]
+  if rand.randint(1,5) == 1:
+    adj = adj +" "+ adjectives[rand.randint(0,len(adjectives)-1)]
+  itm = items[rand.randint(0,len(items)-1)]
+  item=""
+  emoji=""
+  for i in itm:
+    if i.isalpha() or i == " ":
+      item = item+i
+    else:
+      emoji = emoji + i
+
+  genAdj = adj
+  genN = item
+  genEmoji = emoji
+
   #market
   if messagecontent == prefix+"shop":
     if trading() == "":
       scrap = 0
       if str(message.author.id) in db["players"]:
         scrap = db["players"][str(message.author.id)]["scrap"]
-      embed2 = discord.Embed(color=0x000000,description="```\n▌   Welcome to the shop   ▐\n```")
+      embed2 = discord.Embed(color=0x000000,description="```\n▌      Welcome to the shop      ▐\n```")
       embed2.set_author(name="🛒 Marketplace")
   
       #items
-      embed2.add_field(name="1️⃣ - Item Chest | "+str(chestprice)+scrapEmoji, value="A common chest containing an item.", inline=False)
+      embed2.add_field(name=f"1️⃣ - 📦 Item Chest | "+str(chestprice)+" "+scrapEmoji, value="A common chest containing an item.\n-----------------------------------------", inline=False)
+      embed2.add_field(name=f"2️⃣ - {genEmoji} {genN} Paintbrush | "+str(brushPrice)+" "+scrapEmoji, value=f"Change the noun of your item to {genN}", inline=False)
+      embed2.add_field(name=f"3️⃣ - 🖌️ {genAdj} Paintbrush | "+str(brushPrice)+" "+scrapEmoji, value=f"Change the adjective of your item to {genAdj}", inline=False)
       
       embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
       msg = await message.channel.send(embed=embed2)
   
       numbers = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
-      shopAmount = ["1️⃣"]
+      shopAmount = ["1️⃣","2️⃣","3️⃣"]
       def checkR(reaction, user):
         if not user.bot and user.id == message.author.id:
           if reaction.message == msg:
@@ -948,8 +975,8 @@ async def on_message(message):
       prices = []
       await msg.add_reaction("❌")
       for x in range(len(msg.embeds[0].fields)):      
-        shopItems.append(" ".join(msg.embeds[0].fields[x].name.split()[1:-2]))
-        prices.append(" ".join(msg.embeds[0].fields[x].name.split()[-1:]))
+        shopItems.append(" ".join(msg.embeds[0].fields[x].name.split()[1:-3]))
+        prices.append(" ".join(msg.embeds[0].fields[x].name.split()[-2:]))
         await msg.add_reaction(numbers[x])  
   
       while True:
@@ -965,26 +992,38 @@ async def on_message(message):
             if trading() == "":
               boughtItem = shopItems[numbers.index(str(reaction.emoji))]
               price = prices[numbers.index(str(reaction.emoji))]
-              if scrap >= int(price[:-1]):
-                db["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-1])
-                
-                desc, color, fullItem = openChest()
+              print(price)
+              if scrap >= int(price[:-2]):
+                db["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-2])
                 #find user in db
                 if str(message.author.id) not in db["players"]:
                   db["players"][str(message.author.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                 if str(message.guild.id) not in db["players"][str(message.author.id)]:
                   db["players"][str(message.author.id)][str(message.guild.id)] = []
-            
-                #give item
-                db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+
+                if str(reaction.emoji) == "1️⃣":
+                  desc, color, fullItem = openChest()
+                  #give item
+                  db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+                  embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price+"\n"+desc,color=color)
+                  
+                elif str(reaction.emoji) == "2️⃣":
+                  it = f"{genEmoji}|{genN}|pb"
+                  db["players"][str(message.author.id)]["items"].append(it)
+                  embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price,color=0x000000)
+                  
+                elif str(reaction.emoji) == "3️⃣":
+                  it = f"{genEmoji}|{genN}|pb"
+                  db["players"][str(message.author.id)]["items"].append(it)
+                  embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price,color=0x000000)
+
                 scrap = db["players"][str(message.author.id)]["scrap"]
-                
-                embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price+"\n"+desc,color=color)
                 await message.channel.send(embed=embed)
                 embed2.set_footer(text="Scrap: "+str(scrap)+scrapEmoji, icon_url=message.author.avatar_url)
                 await msg.edit(embed=embed2)
               else:
                 await error(message, "You only have "+str(scrap)+scrapEmoji)
+                
             else:
               await error(message, f"Current active trade [here]({trading()})")
           if str(reaction.emoji) == "❌":
