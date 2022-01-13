@@ -118,6 +118,12 @@ chestChanceMAX = 100
 
 pageSize = 8
 
+async def checkZen(message):
+  if message.author.id == (await client.application_info()).owner.id:
+    return True
+  else:
+    await error(message, "You must be the application owner to use this.")
+
 def openChest():
   adj = adjectives[random.randint(0,len(adjectives)-1)]
   if random.randint(1,5) == 1:
@@ -197,11 +203,12 @@ async def on_message(message):
         await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@` , ` `")
 
   #generate item manually
-  #if messagecontent == prefix+"gen":
-    #desc, color, fullItem = openChest()
-    #send message
-    #embed = discord.Embed(description=desc, color=color)
-    #await message.channel.send(embed=embed)
+  if messagecontent == prefix+"gen":
+    if await checkZen(message):
+      desc, color, fullItem = openChest()
+      #send message
+      embed = discord.Embed(description=desc, color=color)
+      await message.channel.send(embed=embed)
 
   async def spawnChest():
     encounter = encounters[random.randint(0,len(encounters)-1)]
@@ -234,9 +241,9 @@ async def on_message(message):
       db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
     
   #chest manually
-  #if messagecontent == prefix+"chest":
-  #  if checkPerms(message):
-  #    await spawnChest()
+  if messagecontent == prefix+"chest":
+    if await checkZen(message):
+      await spawnChest()
   
   if random.randint(1, chestChanceMAX) == 1:
     await spawnChest()
