@@ -496,7 +496,7 @@ async def on_message(message):
           for guild in db["players"][str(usr.id)]:
             if itemsOnPage >= pageSize:
               break
-            if guild != "scrap" and guild != "trading":
+            if guild not in nonGuilds:
               if db["players"][str(usr.id)][guild]:
                 if page*pageSize - (pageSize)  <= count <= page*pageSize:
                   #get invite link
