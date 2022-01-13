@@ -184,7 +184,7 @@ async def on_message(message):
         del db[key]
       #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
       db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
-      #db["players"] = {}
+      db["players"] = {}
       embed = discord.Embed(description="🆑 **Database was cleared**")
       await message.channel.send(embed=embed)
   
@@ -496,11 +496,14 @@ async def on_message(message):
           for guild in db["players"][str(usr.id)]:
             if itemsOnPage >= pageSize:
               break
-            if guild not in nonGuilds:
+            if guild not in nonGuilds or guild == "items":
               if db["players"][str(usr.id)][guild]:
                 if page*pageSize - (pageSize)  <= count <= page*pageSize:
                   #get invite link
-                  link = db[str(guild)]["name"]
+                  if guild == "items":
+                    link = "Items"
+                  else:
+                    link = db[str(guild)]["name"]
                   try:
                     done = False
                     if db[str(guild)]["join"] == True:
@@ -514,8 +517,10 @@ async def on_message(message):
                         inv = await g.text_channels[0].create_invite()
                         link = "["+g.name+"]("+inv.url+")"
                   except:
-                    pass
-                  if messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id:
+                    pass  
+                  if messagecontent.startswith(prefix+"pocket") and str(guild) == str(message.guild.id):
+                    texts = texts + "**" + link + "**\n"
+                  elif guild == "items":
                     texts = texts + "**" + link + "**\n"
                   elif messagecontent.startswith(prefix+"bag"):
                     texts = texts + "**" + link + "**\n"
@@ -525,12 +530,21 @@ async def on_message(message):
                     break
                   count +=1
                   sections = item.split("|")
-                  if messagecontent.startswith(prefix+"pocket") and int(guild) != message.guild.id:
-                    continue
+                  if guild != "items" and messagecontent.startswith(prefix+"pocket"):
+                    if messagecontent.startswith(prefix+"pocket") and str(guild) != str(message.guild.id):
+                      continue
                   if page*pageSize - (pageSize)+1 <= count <= page*pageSize:
                     itemsOnPage += 1
-                    texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
-                if messagecontent.startswith(prefix+"bag") or (messagecontent.startswith(prefix+"pocket") and int(guild) == message.guild.id):
+                    if not guild == "items":
+                      texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
+                    else:
+                      type=""
+                      if sections[2] == "pb":
+                        type = "Paintbrush 🖌️"
+                      texts = texts + f"`{str(count)}` {sections[0]} {sections[1]} {type}\n"
+                if messagecontent.startswith(prefix+"bag") or (messagecontent.startswith(prefix+"pocket") and str(guild) == str(message.guild.id)):
+                  texts = texts + "\n"
+                elif guild == "items":
                   texts = texts + "\n"
         if texts.strip() == "":
           texts = "Your "+splits[0].replace(prefix,"")+" is awfully empty."
