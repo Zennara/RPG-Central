@@ -347,7 +347,7 @@ async def on_message(message):
     `{prefix}bag` - Show all of your items
     `{prefix}pocket` - Show all your items from this server
     `{prefix}shop` - View the marketplace
-    `{prefix}showoff <id> - Brag about an item
+    `{prefix}showoff <id>` - Brag about an item
     `{prefix}trade <member>` - Start a trade with another player
     `{prefix}distill <id>` - Change the adjective of your item
     `{prefix}transmute <id>` - Change the object of your item
