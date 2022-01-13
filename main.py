@@ -25,6 +25,8 @@ except:
 intents = discord.Intents.all() #declare what Intents you use, these will be checked in the Discord dev portal
 client = discord.Client(intents=intents)
 
+nonGuilds = ["trading","items","shows","scrap"]
+
 
 #declare file lists
 adjectives = []
@@ -94,7 +96,7 @@ def getItem(player, id):
   count2 = 0
   if str(player) in db["players"]:
     for guild in db["players"][str(player)]:
-      if guild != "scrap" and guild != "trading":
+      if guild not in nonGuilds:
         count2 = 0
         for item in db["players"][str(player)][guild]:
           count += 1
@@ -178,7 +180,7 @@ async def on_message(message):
         del db[key]
       #my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
       db[str(message.guild.id)] = {"prefix": "!", "name" : message.guild.name, "join" : False}
-      db["players"] = {}
+      #db["players"] = {}
       embed = discord.Embed(description="🆑 **Database was cleared**")
       await message.channel.send(embed=embed)
   
@@ -269,7 +271,7 @@ async def on_message(message):
               embed = discord.Embed(title="🧬 Item Generated", description=desc, color=color)
               await message.channel.send(embed=embed)
               if str(message.author.id) not in db["players"]:
-                db["players"][str(message.author.id)] = {"scrap":0,"trading":""}
+                db["players"][str(message.author.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
               if str(message.guild.id) not in db["players"][str(message.author.id)]:
                 db["players"][str(message.author.id)][str(message.guild.id)] = []
               db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
@@ -304,9 +306,7 @@ async def on_message(message):
       await msg.edit(embed=embed)
       #find user in db
       if str(user.id) not in db["players"]:
-        db["players"][str(user.id)] = {}
-        db["players"][str(user.id)]["scrap"] = 0
-        db["players"][str(user.id)]["trading"] = ""
+        db["players"][str(user.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
       if str(message.guild.id) not in db["players"][str(user.id)]:
         db["players"][str(user.id)][str(message.guild.id)] = []
       #give item
@@ -338,7 +338,7 @@ async def on_message(message):
       embed = discord.Embed(description="Thank you, "+m1.author.mention+", for embracing the universe in your arms.\n*Here is your crown.*",title="👑 A Ruler is Crowned",color=0xFFD700)
       await msg.edit(embed=embed)
       if str(m1.author.id) not in db["players"]:
-        db["players"][str(m1.author.id)] = {"scrap":0,"trading":""}
+        db["players"][str(m1.author.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
       if str(message.guild.id) not in db["players"][str(m1.author.id)]:
         db["players"][str(m1.author.id)][str(message.guild.id)] = []
       db["players"][str(m1.author.id)][str(message.guild.id)].append("👑|Legendary|*Crown of the Supreme*|**Overlord**|+4")
@@ -653,8 +653,7 @@ async def on_message(message):
                     item = db["players"][str(message.author.id)][guild1][count1-1]
                     del db["players"][str(message.author.id)][guild1][count1-1]
                     if str(mbr.id) not in db["players"]:
-                      db["players"][str(mbr.id)] = {}
-                      db["players"][str(mbr.id)]["scrap"] = 0
+                      db["players"][str(mbr.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                     if guild1 not in db["players"][str(mbr.id)]:
                       db["players"][str(mbr.id)][guild1] = []
                     db["players"][str(mbr.id)][guild1].append(item)
@@ -698,8 +697,7 @@ async def on_message(message):
                     scrap = db["players"][str(message.author.id)]["scrap"]
                     if scrap >= amount:
                       if splits[1] not in db["players"]:
-                        db["players"][str(mbr.id)] = {}
-                        db["players"][str(mbr.id)]["scrap"] = 0
+                        db["players"][str(mbr.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                       #gave amount to user
                       db["players"][str(mbr.id)]["scrap"] = db["players"][str(mbr.id)]["scrap"] + amount
                       #subtract amount
@@ -973,8 +971,7 @@ async def on_message(message):
                 desc, color, fullItem = openChest()
                 #find user in db
                 if str(message.author.id) not in db["players"]:
-                  db["players"][str(message.author.id)] = {}
-                  db["players"][str(message.author.id)]["scrap"] = 0
+                  db["players"][str(message.author.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                 if str(message.guild.id) not in db["players"][str(message.author.id)]:
                   db["players"][str(message.author.id)][str(message.guild.id)] = []
             
@@ -1037,9 +1034,9 @@ async def on_message(message):
                 await msg.clear_reactions()
                 if str(r.emoji) == "✅":
                   if str(tradee.id) not in db["players"]:
-                    db["players"][str(tradee.id)] = {"scrap":0, "trading":""}
+                    db["players"][str(tradee.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                   if str(message.author.id) not in db["players"]:
-                    db["players"][str(message.author.id)] = {"scrap":0, "trading":""}
+                    db["players"][str(message.author.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                   if trading() == "" and db["players"][str(tradee.id)]["trading"] == "":
                     db["players"][str(tradee.id)]["trading"] = msg.jump_url
                     db["players"][str(message.author.id)]["trading"] = msg.jump_url
@@ -1257,9 +1254,9 @@ async def on_message(message):
                       await msg.edit(embed=embed)
                       
                       if str(tradee.id) not in db["players"]:
-                        db["players"][str(tradee.id)] = {"scrap":0, "trading":""}
+                        db["players"][str(tradee.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                       if str(message.author.id) not in db["players"]:
-                        db["players"][str(message.author.id)] = {"scrap":0, "trading":""}
+                        db["players"][str(message.author.id)] = {"scrap":0,"trading":"","items":[],"shows":{}}
                         
                       for x in traderTrades:
                         gi = x.split("|")
