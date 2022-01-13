@@ -210,8 +210,43 @@ async def on_message(message):
     if await checkZen(message):
       desc, color, fullItem = openChest()
       #send message
-      embed = discord.Embed(description=desc, color=color)
+      embed = discord.Embed(title="🚧 Item Test Generated",description=desc, color=color)
       await message.channel.send(embed=embed)
+
+  #generate and give an item
+  if messagecontent.startswith(prefix+"gen"):
+    if await checkZen(message):
+      sp = message.content.split(" ", 1)
+      if len(sp) == 2:
+        splits = sp[1].split("|")
+        splits = [s.strip() for s in splits]
+        if len(splits) == 5:
+          emoji = splits[0]
+          adj = splits[2]
+          item = splits[3]
+          if splits[1].lower() in [s.lower() for s in rarities]:
+            rarity = rarities[[s.lower() for s in rarities].index(splits[1].lower())]
+            if splits[4].replace("+","") in [s.replace("+","") for s in additives]:
+              addition = additives[[s.replace("+","") for s in additives].index(splits[4].replace("+",""))]
+              color = colors[rarities.index(rarity)]
+              desc = emoji+" **["+ rarity +"]** "+ adj +" "+ item +" "+ addition
+              fullItem = emoji+"|"+rarity+"|"+adj+"|"+item+"|"+addition
+              #send message
+              embed = discord.Embed(title="🧬 Item Generated", description=desc, color=color)
+              await message.channel.send(embed=embed)
+              if str(message.author.id) not in db["players"]:
+                db["players"][str(message.author.id)] = {"scrap":0,"trading":""}
+              if str(message.guild.id) not in db["players"][str(message.author.id)]:
+                db["players"][str(message.author.id)][str(message.guild.id)] = []
+              db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+            else:
+              await error(message, "Invalid additive")
+          else:
+            await error(message, "Invalid rarity")
+        else:
+          await error(message, "Not enough arguments for item")
+      else:
+        await error(message, "Please specify the item")
 
   async def spawnChest():
     encounter = encounters[random.randint(0,len(encounters)-1)]
