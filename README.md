@@ -5,7 +5,7 @@ A Discord bot for generating, trading, and collecting items. Currently, there ar
 I highly advise **not** to fork this code to create your own version of the bot unless you are changing many things. This bot uses a global trading system across all servers, and creating a custom bot from this code will not allow you to communicate over the global network.
 
 ## Invite the bot
-You can invite this bot to your servers using the link [here](https://discord.com/api/oauth2/authorize?client_id=929935460699082782&permissions=8&scope=bot). The bot requests administrator permissions in the event I update the bot to need more. You can always remove permissions if you'd like, but I can not guarantee everything will continue working.
+You can invite this bot to your servers using the link [here](https://discord.com/api/oauth2/authorize?client_id=929935460699082782&permissions=140929002609&scope=bot). The bot requests many permissions in the event I update the bot to need more. You can always remove permissions if you'd like, but I can not guarantee everything will continue working.
 
 ## Enjoy the bot?
 If you enjoy this free bot, it would mean the world to [donate](https://paypal.me/keaganlandfried). This ensures I can keep this bot and others like it online for years to come.
