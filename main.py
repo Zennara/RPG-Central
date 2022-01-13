@@ -287,7 +287,7 @@ async def on_message(message):
     await spawnChest()
 
   #ULTRA SECRETS
-  if random.randint(1, 100000) == 1:
+  if random.randint(1, 1000000) == 1:
     embed = discord.Embed(description="Welp! Looks like you broke the entire space-time continium. If you wish to now be the **All-Watching Supreme Overlord of the Universe**, please enter **the password**.",title="🌌 A Multidimentional Rift Has Opened",color=0x7851A9)
     embed.set_footer(text="you have 30 seconds before the universe implodes")
     msg = await message.channel.send(embed=embed)
