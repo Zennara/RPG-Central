@@ -152,6 +152,11 @@ def openChest():
 
 @client.event
 async def on_message(message):
+  if message.author.id == client.user.id:
+    print("BOT MESSAGE")
+  else:
+    print(f"[{message.guild.name}]-{message.author.name}: {message.content}")
+    
   #check for bots
   if message.author.bot:
     return
