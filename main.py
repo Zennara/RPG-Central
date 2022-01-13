@@ -599,27 +599,30 @@ async def on_message(message):
           if mbr.isnumeric():
             if message.guild.get_member(int(mbr)):
               mbr = message.guild.get_member(int(mbr))
-              guild1, count1 = getItem(message.author.id, int(splits[2]))
-              if str(message.author.id) in db["players"]:
-                if guild1 != False:
-                  item = db["players"][str(message.author.id)][guild1][count1-1]
-                  del db["players"][str(message.author.id)][guild1][count1-1]
-                  if str(mbr.id) not in db["players"]:
-                    db["players"][str(mbr.id)] = {}
-                    db["players"][str(mbr.id)]["scrap"] = 0
-                  if guild1 not in db["players"][str(mbr.id)]:
-                    db["players"][str(mbr.id)][guild1] = []
-                  db["players"][str(mbr.id)][guild1].append(item)
-                  splits = item.split("|")
-                  item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
-                  embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
-                  embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
-                  embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
-                  await message.channel.send(embed=embed)
+              if mbr.id != message.author.id:
+                guild1, count1 = getItem(message.author.id, int(splits[2]))
+                if str(message.author.id) in db["players"]:
+                  if guild1 != False:
+                    item = db["players"][str(message.author.id)][guild1][count1-1]
+                    del db["players"][str(message.author.id)][guild1][count1-1]
+                    if str(mbr.id) not in db["players"]:
+                      db["players"][str(mbr.id)] = {}
+                      db["players"][str(mbr.id)]["scrap"] = 0
+                    if guild1 not in db["players"][str(mbr.id)]:
+                      db["players"][str(mbr.id)][guild1] = []
+                    db["players"][str(mbr.id)][guild1].append(item)
+                    splits = item.split("|")
+                    item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
+                    embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
+                    embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
+                    embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
+                    await message.channel.send(embed=embed)
+                  else:
+                    await error(message, "Item does not exist.")
                 else:
-                  await error(message, "Item does not exist.")
+                  await error(message, "You have no items to give.")
               else:
-                await error(message, "You have no items to give.")
+                await error(message, "You can not give items to yourself.")
             else:
               await error(message, "Member not in the guild.")
           else:
@@ -640,32 +643,35 @@ async def on_message(message):
         if splits[1].isnumeric():
           if message.guild.get_member(int(splits[1])):
             mbr = message.guild.get_member(int(splits[1]))
-            if splits[2].isnumeric():
-              amount = int(splits[2])
-              if amount > 0:
-                if str(message.author.id) in db["players"]:
-                  scrap = db["players"][str(message.author.id)]["scrap"]
-                  if scrap >= amount:
-                    if splits[1] not in db["players"]:
-                      db["players"][str(mbr.id)] = {}
-                      db["players"][str(mbr.id)]["scrap"] = 0
-                    #gave amount to user
-                    db["players"][str(mbr.id)]["scrap"] = db["players"][str(mbr.id)]["scrap"] + amount
-                    #subtract amount
-                    db["players"][str(message.author.id)]["scrap"] = scrap - amount
-                    #confirmation message
-                    embed = discord.Embed(color=0x000000,description="gave **"+str(amount)+"** "+scrapEmoji + " to:")
-                    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-                    embed.set_footer(text=mbr.name,icon_url=mbr.avatar_url)
-                    await message.channel.send(embed=embed)
+            if mbr.id != message.author.id:
+              if splits[2].isnumeric():
+                amount = int(splits[2])
+                if amount > 0:
+                  if str(message.author.id) in db["players"]:
+                    scrap = db["players"][str(message.author.id)]["scrap"]
+                    if scrap >= amount:
+                      if splits[1] not in db["players"]:
+                        db["players"][str(mbr.id)] = {}
+                        db["players"][str(mbr.id)]["scrap"] = 0
+                      #gave amount to user
+                      db["players"][str(mbr.id)]["scrap"] = db["players"][str(mbr.id)]["scrap"] + amount
+                      #subtract amount
+                      db["players"][str(message.author.id)]["scrap"] = scrap - amount
+                      #confirmation message
+                      embed = discord.Embed(color=0x000000,description="gave **"+str(amount)+"** "+scrapEmoji + " to:")
+                      embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                      embed.set_footer(text=mbr.name,icon_url=mbr.avatar_url)
+                      await message.channel.send(embed=embed)
+                    else:
+                      await error(message, "You only have "+str(scrap)+scrapEmoji)
                   else:
-                    await error(message, "You only have "+str(scrap)+scrapEmoji)
+                    await error(message, "You do not have any scrap.")
                 else:
-                  await error(message, "You do not have any scrap.")
+                  await error(message, "Please enter an amount above `0`")
               else:
-                await error(message, "Please enter an amount above `0`")
+                await error(message, "Scrap amount should be numeric")
             else:
-              await error(message, "Scrap amount should be numeric")
+              await error(message, "You can not pay yourself.")
           else:
             await error(message, "Invalid player mention or ID")
         else:
