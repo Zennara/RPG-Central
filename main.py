@@ -365,7 +365,7 @@ async def on_message(message):
 
   #help for each command
   elif messagecontent.startswith(prefix+"help"):
-    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","","delete","private","public","showoff"]
+    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","give","delete","private","public","showoff"]
     if messagecontent.split()[1] in commands:
       cmd = commands.index(messagecontent.split()[1])
       if cmd==0:
