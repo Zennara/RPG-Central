@@ -296,7 +296,7 @@ async def on_message(message):
       reaction, user = await client.wait_for('reaction_add', check=check, timeout=300)
     except asyncio.TimeoutError:
       embed = discord.Embed(description="🏃 Looks like someone got the loot before you...")
-      msg.edit(embed=embed)
+      await msg.edit(embed=embed)
     else:
       desc, color, fullItem = openChest()
       embed = discord.Embed(description=desc, color=color) 
