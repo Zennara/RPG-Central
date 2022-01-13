@@ -363,6 +363,9 @@ async def on_message(message):
     **Staff Commands**
     `{prefix}private` - Set your server to private
     `{prefix}public` - Set your server to public
+
+    **Created by Zennara#8377**
+    Invite the bot [here](https://discord.com/api/oauth2/authorize?client_id=929935460699082782&permissions=140929002609&scope=bot)
     """
     embed = discord.Embed(description=text, color=0x000000)
     embed.set_footer(text="<> - Required | [] - Optional")
