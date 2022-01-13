@@ -550,11 +550,11 @@ async def on_message(message):
               done = False
               def checkR(reaction, user):
                 if not user.bot and user.id == message.author.id:
+                  if str(reaction.emoji) == "✅":
+                    asyncio.create_task(reaction.message.clear_reactions())
+                    return True
                   if reaction.message == msg:
-                    if str(reaction.emoji) == "✅":
-                      asyncio.create_task(reaction.message.clear_reactions())
-                      return True
-                    elif str(reaction.emoji) == "❌":
+                    if str(reaction.emoji) == "❌":
                       asyncio.create_task(reaction.message.clear_reactions())
                       return True
               await msg.add_reaction("✅")
@@ -567,7 +567,11 @@ async def on_message(message):
                   break
                 else:
                   if str(reaction.emoji) == "✅":
-                    break
+                    if reaction.message == msg:
+                      break
+                    else:
+                      done=True
+                      break
                   if str(reaction.emoji) == "❌":
                     done = True
                     break
@@ -576,6 +580,7 @@ async def on_message(message):
                 embed = discord.Embed(description=deletedItem,color=0x000000, title="🗑️ Item deleted.")
                 await msg.edit(embed=embed)
               else:
+                asyncio.create_task(msg.clear_reactions())
                 embed = discord.Embed(description="✅ Deletion cancelled.",color=0x000000)
                 await msg.edit(embed=embed)
             else:
