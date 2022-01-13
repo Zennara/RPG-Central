@@ -183,12 +183,14 @@ async def on_message(message):
   #change prefix
   if messagecontent.startswith(prefix + "prefix"):
     if checkPerms(message):
-      if not any(x in messagecontent for x in ["`",">","@","*","~","_"," "]):
+      print(messagecontent[len(prefix)+7:])
+      if not any(x in messagecontent[len(prefix)+7:] for x in ["`",">","@","*","~","_"," "]):
         if len(messagecontent) <= len(prefix) + 10:
-          db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
-          embed = discord.Embed(color=0x00FF00, description ="Prefix is now `" + message.content.split()[1:][0] + "`")
-          embed.set_author(name="Prefix Change")
-          await message.channel.send(embed=embed)
+          if len(messagecontent.split()) > 1:
+            db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
+            embed = discord.Embed(color=0x00FF00, description ="Prefix is now `" + message.content.split()[1:][0] + "`")
+            embed.set_author(name="Prefix Change")
+            await message.channel.send(embed=embed)
         else:
           await error(message, "Prefix must be between `1` and `3` characters.")
       else:
