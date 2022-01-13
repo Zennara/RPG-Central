@@ -118,9 +118,6 @@ chestChanceMAX = 100
 
 pageSize = 8
 
-def spawnItem():
-  pass
-
 async def checkZen(message):
   if message.author.id == (await client.application_info()).owner.id:
     return True
@@ -209,7 +206,7 @@ async def on_message(message):
         await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `>` , `@` , ` `")
 
   #generate item manually
-  if messagecontent == prefix+"gen":
+  if messagecontent == prefix+"testgen":
     if await checkZen(message):
       desc, color, fullItem = openChest()
       #send message
