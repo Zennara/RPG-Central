@@ -1271,7 +1271,8 @@ async def on_message(message):
 
 @client.event
 async def on_guild_join(guild):
-  db[str(guild.id)] = {"prefix": "!", "name" : guild.name, "join" : False} #for database support
+  if db[str(guild.id)] not in db:
+    db[str(guild.id)] = {"prefix": "!", "name" : guild.name, "join" : False} #for database support
 
 @client.event
 async def on_guild_update(before, after):
