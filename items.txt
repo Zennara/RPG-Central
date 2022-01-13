@@ -91,7 +91,7 @@
 🥧Pie
 🍫Chocolate Bar
 🍬Candy
-🍭LollWineipop
+🍭LollWineWineipop
 🍮Custard
 🍯Honey Pot
 🍼Bottle
@@ -283,7 +283,7 @@
 🏒Hockey Stick
 🏓Paddle
 🏸Racket
-🥊Boe
+🥊
 🥋Gi
 🥅Net
 ⛸️Ice Skate
@@ -389,7 +389,7 @@
 📔Spellbook
 📕Book
 📓Notebook
-📒Ledger
+📒LedgerChains
 📜Scroll
 📰Newspaper
 🪙Coin
@@ -414,8 +414,7 @@
 🔒Lock
 🔑Key
 🔨Hammer
-🪓Axe
-⛏️Pick
+🪓Axhreadk
 🛠️Tools
 🗡️Dagger
 ⚔️Sword

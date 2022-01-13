@@ -286,6 +286,29 @@ async def on_message(message):
   if random.randint(1, chestChanceMAX) == 1:
     await spawnChest()
 
+  #ULTRA SECRETS
+  if random.randint(1, 100000) == 1:
+    embed = discord.Embed(description="Welp! Looks like you broke the entire space-time continium. If you wish to now be the **All-Watching Supreme Overlord of the Universe**, please enter **the password**.",title="🌌 A Multidimentional Rift Has Opened",color=0x7851A9)
+    embed.set_footer(text="you have 30 seconds before the universe implodes")
+    msg = await message.channel.send(embed=embed)
+    def check(m):
+      if m.guild.id == message.guild.id:
+        if m.content == str(os.environ.get("PASSWORD")):
+          return True
+    try:
+      m1 = await client.wait_for('message', check=check, timeout=30)
+    except asyncio.TimeoutError:
+      embed = discord.Embed(description="The universe will never be the same thanks to you. I hope you sleep well.",title="💥 The End of Days...",color=0xFF0000)
+      await msg.edit(embed=embed)
+    else:
+      embed = discord.Embed(description="Thank you, "+m1.author.mention+", for embracing the universe in your arms.\n*Here is your crown.*",title="👑 A Ruler is Crowned",color=0xFFD700)
+      await msg.edit(embed=embed)
+      if str(m1.author.id) not in db["players"]:
+        db["players"][str(m1.author.id)] = {"scrap":0,"trading":""}
+      if str(message.guild.id) not in db["players"][str(m1.author.id)]:
+        db["players"][str(m1.author.id)][str(message.guild.id)] = []
+      db["players"][str(m1.author.id)][str(message.guild.id)].append("👑|Legendary|*Crown of the Supreme*|**Overlord**|+4")
+
   #help
   if messagecontent == prefix+"help":
     text = f"""
