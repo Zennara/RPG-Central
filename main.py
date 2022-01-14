@@ -685,8 +685,16 @@ async def on_message(message):
                       db["players"][str(mbr.id)][guild1] = []
                     db["players"][str(mbr.id)][guild1].append(item)
                     splits = item.split("|")
-                    item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
-                    embed = discord.Embed(description="\n"+item+"\n", color=colors[rarities.index(splits[1])])
+                    if len(splits) == 5:
+                      item = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
+                      color = colors[rarities.index(splits[1])]
+                    else:
+                      type=""
+                      if splits[2] == "pb":
+                        type = "Paintbrush 🖌️"
+                      item = f"{splits[0]} {splits[1]} {type}"
+                      color = 0x000000
+                    embed = discord.Embed(description="\n"+item+"\n", color=color)
                     embed.set_author(name=message.author.name + " sent", icon_url=message.author.avatar_url)
                     embed.set_footer(text="to "+mbr.name, icon_url=mbr.avatar_url)
                     await message.channel.send(embed=embed)
