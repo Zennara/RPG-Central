@@ -64,7 +64,7 @@
 🧈Butter
 🧂Salt
 🥫Can
-🍱Bent
+🍱Bento
 🍙Onigiri
 🍚Rice
 🍛Curry
@@ -91,7 +91,7 @@
 🥧Pie
 🍫Chocolate Bar
 🍬Candy
-🍭LollWineWineipop
+🍭Lollipop
 🍮Custard
 🍯Honey Pot
 🍼Bottle
@@ -100,7 +100,8 @@
 🫖Teapot
 🍵Green Tea
 🍶Sake
-🍾Champagne🍷
+🍾Champagne
+🍷Wine
 🍸Cocktail
 🍹Tropical Drink
 🍺Beer
@@ -110,9 +111,7 @@
 🧊Ice
 🥢Chopsticks
 🍴Silverware
-🥄Spoon
-
-
+🥄Spoo
 💦Droplets
 🐒Monkey
 🦍Gorilla
@@ -283,7 +282,7 @@
 🏒Hockey Stick
 🏓Paddle
 🏸Racket
-🥊
+🥊Boe
 🥋Gi
 🥅Net
 ⛸️Ice Skate
@@ -311,9 +310,6 @@
 🎻Violin
 🥁Drum
 🏹Bow
-
-
-
 💌Love Letter
 🕳️Hole
 💣Bomb
@@ -389,7 +385,7 @@
 📔Spellbook
 📕Book
 📓Notebook
-📒LedgerChains
+📒Ledger
 📜Scroll
 📰Newspaper
 🪙Coin
@@ -414,7 +410,8 @@
 🔒Lock
 🔑Key
 🔨Hammer
-🪓Axhreadk
+🪓Axe
+⛏️Pick
 🛠️Tools
 🗡️Dagger
 ⚔️Sword
@@ -429,7 +426,7 @@
 🗜️Clamp
 ⚖️Scale
 🦯Cane
-⛓️
+⛓️Chains
 🪵Log
 💀Skull
 💩Poop
@@ -461,8 +458,7 @@
 🧳Luggage
 ☂️Umbrella
 🎃Jack-O-Lantern
-🧵T
-⛓️hread
+🧵Thread
 🧶Yarn
 👓Glasses
 🕶️Sunglasses
@@ -508,6 +504,92 @@
 💼Briefcase
 👝Pouch
 😃MaskChain
+🪝Hook
+🧰Toolbox
+🧲Magnet
+🪜Ladder
+⚗️Alembic
+🧪Test Tube
+🧫Petri Dish
+🧬DNA
+🔬Microscope
+🔭Telescope
+📡Satellite
+💉Syringe
+💊Pill
+🩹Bandage
+🩺Stethoscope
+🚪Door
+🪞Mirror
+🛏️Bed
+🛋️Couch
+🪑Chair
+🚽Toilet
+🪠Plunger
+🚿Shower
+🛁Bathtub
+🪤Trap
+🪒Razor
+🧴Lotion
+🧷Safety Pin
+🧹Broom
+🧺Basket
+🧻Toilet Paper
+🪣Bucket
+🧼Soap
+🪥Toothbrush
+🧽Sponge
+🧯Fire Extinguisher
+🛒Shopping Cart
+🚬Cigarette
+⚰️Coffin
+🪦Headstone
+⚱️Urn
+🗿Moai
+🪧Signhain
+🪝Hook
+🧰Toolbox
+🧲Magnet
+🪜Ladder
+⚗️Alembic
+🧪Test Tube
+🧫Petri Dish
+🧬DNA
+🔬Microscope
+🔭Telescope
+📡Satellite
+💉Syringe
+💊Pill
+🩹Bandage
+🩺Stethoscope
+🚪Door
+🪞Mirror
+🛏️Bed
+🛋️Couch
+🪑Chair
+🚽Toilet
+🪠Plunger
+🚿Shower
+🛁Bathtub
+🪤Trap
+🪒Razor
+🧴Lotion
+🧷Safety Pin
+🧹Broom
+🧺Basket
+🧻Toilet Paper
+🪣Bucket
+🧼Soap
+🪥Toothbrush
+🧽Sponge
+🧯Fire Extinguisher
+🛒Shopping Cart
+🚬Cigarette
+⚰️Coffin
+🪦Headstone
+⚱️Urn
+🗿Moai
+🪧Signn
 🪝Hook
 🧰Toolbox
 🧲Magnet

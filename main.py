@@ -763,8 +763,19 @@ async def on_message(message):
             guild1, count1 = getItem(message.author.id, int(splits[1]))
             if guild1 != False:
               splits = db["players"][str(message.author.id)][guild1][count1-1].split("|")
-              scrapItem = emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
-              scrapAmount = int(scrapAmounts[rarities.index(splits[1])] * multipliers[int(splits[4].replace("+",""))])
+
+              if len(splits) != 3:
+                scrapItem = emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+                scrapAmount = int(scrapAmounts[rarities.index(splits[1])] * multipliers[int(splits[4].replace("+",""))])
+              else:
+                type = ""
+                print(splits[2])
+                if splits[2] == "pb":
+                  #LEFTOFF
+                  type = "Paintbrush 🖌️"
+                scrapItem = f"{splits[0]} {splits[1]} {type}"
+                scrapAmount = int(brushPrice / 4)
+                
               embed = discord.Embed(color=0xff0000, description=scrapItem, title="⚠️ Are you sure you want to **scrap** this item for "+ str(scrapAmount) +scrapEmoji +"?")
               msg = await message.channel.send(embed=embed)
               done = False
