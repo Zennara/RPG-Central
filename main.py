@@ -1181,7 +1181,13 @@ async def on_message(message):
                                 if guild1 != False:
                                   i = guild1+"|"+str(count1)
                                   splits = db["players"][str(m.author.id)][guild1][count1-1].split("|")
-                                  addItem = "`"+m.content+"` "+emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+                                  if len(splits) == 5:
+                                    addItem = "`"+m.content+"` "+emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
+                                  else:
+                                    type=""
+                                    if splits[2] == "pb":
+                                      type = "Paintbrush 🖌️"
+                                    addItem = f"{splits[0]} {splits[1]} {type}"
                                   if m.author.id == message.author.id:
                                     if guild1+"|"+str(count1) not in traderTrades:
                                       traderTrades.append(i)
