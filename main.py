@@ -948,9 +948,18 @@ async def on_message(message):
                 if guild2 != False:
                   if guild1 == guild2:
                     item1 = db["players"][str(message.author.id)][guild1][count1-1].split("|")
-                    item1 = "`"+splits[1]+"` "+emojis[rarities.index(item1[1])] + item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
                     item2 = db["players"][str(message.author.id)][guild2][count2-1].split("|")
-                    item2 = "`"+splits[2]+"` "+emojis[rarities.index(item2[1])] + item2[0] +" **["+ item2[1] +"]** "+ item2[2] +" "+ item2[3] +" "+ item2[4]
+                    if len(item1) == 5:
+                      item1 = "`"+splits[1]+"` "+emojis[rarities.index(item1[1])] + item1[0] +" **["+ item1[1] +"]** "+ item1[2] +" "+ item1[3] +" "+ item1[4]
+                      item2 = "`"+splits[2]+"` "+emojis[rarities.index(item2[1])] + item2[0] +" **["+ item2[1] +"]** "+ item2[2] +" "+ item2[3] +" "+ item2[4]
+                    else:
+                      type=""
+                      if item1[2] == "pb":
+                        type1 = "Paintbrush 🖌️"
+                      if item2[2] == "pb":
+                        type2 = "Paintbrush 🖌️"
+                      item1 = f"{item1[0]} {item1[1]} {type1}"
+                      item2 = f"{item2[0]} {item2[1]} {type2}"
                     db["players"][str(message.author.id)][guild1][count1-1],db["players"][str(message.author.id)][guild2][count2-1] = db["players"][str(message.author.id)][guild2][count2-1],db["players"][str(message.author.id)][guild1][count1-1]
                     embed = discord.Embed(color=0x000000,title="🔀 **Swapped**",description=item1 +"\n**with**\n" + item2)
                     await message.channel.send(embed=embed)
