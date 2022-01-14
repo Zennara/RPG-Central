@@ -914,8 +914,16 @@ async def on_message(message):
                     db["players"][str(message.author.id)][guild1].pop(count1-1)
                     db["players"][str(message.author.id)][guild1].insert(count2-1, insertItem)           
                     iSplit = db["players"][str(message.author.id)][guild1][count2-1].split("|")
-                    item1 = emojis[rarities.index(iSplit[1])] +" "+ iSplit[0] +" **["+ iSplit[1] +"]** "+ iSplit[2] +" "+ iSplit[3] +" "+ iSplit[4]
-                    embed = discord.Embed(color=colors[rarities.index(iSplit[1])],title="🚚 **Moved**",description=item1+"\n`"+splits[1]+"` ➡️ `"+splits[2]+"`")
+                    if len(iSplit) == 5:
+                      item1 = emojis[rarities.index(iSplit[1])] +" "+ iSplit[0] +" **["+ iSplit[1] +"]** "+ iSplit[2] +" "+ iSplit[3] +" "+ iSplit[4]
+                      color = colors[rarities.index(iSplit[1])]
+                    else:
+                      type=""
+                      if iSplit[2] == "pb":
+                        type1 = "Paintbrush 🖌️"
+                      item1 = f"{iSplit[0]} {iSplit[1]} {type1}"
+                      color = 0x000000
+                    embed = discord.Embed(color=color,title="🚚 **Moved**",description=item1+"\n`"+splits[1]+"` ➡️ `"+splits[2]+"`")
                     await message.channel.send(embed=embed)
                   else:
                     await error(message, "Cannot move item to an index of another guild.")
