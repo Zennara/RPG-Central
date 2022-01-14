@@ -613,7 +613,14 @@ async def on_message(message):
           if str(message.author.id) in db["players"]:
             guild1, count1 = getItem(message.author.id, id)
             if guild1 != False:
-              deletedItem = db["players"][str(message.author.id)][guild1][count1-1].replace("|"," ")
+              splits = db["players"][str(message.author.id)][guild1][count1-1].split("|")
+              if len(splits) == 5:
+                deletedItem = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
+              else:
+                type = ""
+                if splits[2] == "pb":
+                  type = "Paintbrush 🖌️"
+                deletedItem = f"{splits[0]} {splits[1]} {type}"
               embed = discord.Embed(color=0x000000, description=deletedItem, title="⚠️ Are you sure you want to delete?")
               msg = await message.channel.send(embed=embed)
               done = False
