@@ -739,16 +739,27 @@ async def on_message(message):
             if guild1 == "items":
               if guild2 != False:
                 if guild2 != "items":
-                  im = db["players"][str(message.author.id)]["items"][count1-1].split("|")
+                  consumable = db["players"][str(message.author.id)]["items"][count1-1].split("|")
                   usableItems = ["pba","pbn"]
-                  if im[2] in usableItems:
-                    consumable = db["players"][str(message.author.id)][guild1][count1-1]
-                    consumable = consumable.split("|")
-                    itm = db["players"][str(message.author.id)][guild2][count2-1]
-                    if im[2] == "pba":
-                      pass
-                    elif im[2] == "pbn":
-                      pass
+                  if consumable[2] in usableItems:
+                    itm = db["players"][str(message.author.id)][guild2][count2-1].split("|")
+                    rarity = itm[1]
+                    noun = itm[3]
+                    emoji = itm[0]
+                    adj = itm[2]
+                    addition = itm[4]
+                    color = colors[rarities.index(rarity)]
+                    if consumable[2] == "pba":
+                      adj = consumable[1]
+                    elif consumable[2] == "pbn":
+                      emoji = consumable[0]
+                      noun = consumable[1]
+                    newItemDisplay = f"{emoji} **{rarity}** {adj} {noun} {addition}"
+                    newItemLog = f"{emoji}|{rarity}|{adj}|{noun}|{addition}"
+                    embed = discord.Embed(title="🖌️ Paintbrush Used" ,description=f"{newItemDisplay}", color=color)
+                    await message.channel.send(embed=embed)
+                    del db["players"][str(message.author.id)]["items"][count1-1]
+                    db["players"][str(message.author.id)][guild2][count2-1] = newItemLog
                   else:
                     await error(message, "This item can not be used")
                 else:
