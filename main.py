@@ -372,7 +372,7 @@ async def on_message(message):
     `{prefix}scrap <id>` - Scrap the item
     `{prefix}give <member> <id>` - Give the item to another player
     `{prefix}delete <id>` - Delete an item
-    `{prefix}use <id>` - Use a consumable item
+    `{prefix}use <item> <collectable>` - Use a consumable item
 
     **Staff Commands**
     `{prefix}private` - Set your server to private
@@ -387,7 +387,7 @@ async def on_message(message):
 
   #help for each command
   elif messagecontent.startswith(prefix+"help"):
-    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","give","delete","private","public","showoff"]
+    commands = ["help","prefix","bag","pocket","shop","trade","distill","transmute","scrap","give","delete","private","public","showoff","use"]
     if messagecontent.split()[1] in commands:
       cmd = commands.index(messagecontent.split()[1])
       if cmd==0:
@@ -445,6 +445,10 @@ async def on_message(message):
       elif cmd==13:
         text=f"""
         Shows off an item from the `id` and displays it in the channel along with a randomly generated message.
+        """
+      elif cmd==14:
+        text=f"""
+        Uses an item from your consumable items list. This includes **Paintbrushes**.
         """
 
       #send command
@@ -549,7 +553,7 @@ async def on_message(message):
                       texts = texts + "`"+str(count)+"` "+(emojis[rarities.index(sections[1])]+" "+sections[0]+" **["+sections[1]+"]** "+sections[2]+" "+sections[3]+" "+sections[4]) + "\n"
                     else:
                       type=""
-                      if sections[2] == "pb":
+                      if sections[2] == "pba" or sections[2] == "pbn":
                         type = "Paintbrush 🖌️"
                       texts = texts + f"`{str(count)}` {sections[0]} {sections[1]} {type}\n"
                 if messagecontent.startswith(prefix+"bag") or (messagecontent.startswith(prefix+"pocket") and str(guild) == str(message.guild.id)):
@@ -619,7 +623,7 @@ async def on_message(message):
                 deletedItem = splits[0] +" **["+ splits[1] +"]** "+ splits[2] +" "+ splits[3] +" "+splits[4]
               else:
                 type = ""
-                if splits[2] == "pb":
+                if splits[2] == "pba" or splits[2] == "pbn":
                   type = "Paintbrush 🖌️"
                 deletedItem = f"{splits[0]} {splits[1]} {type}"
               embed = discord.Embed(color=0x000000, description=deletedItem, title="⚠️ Are you sure you want to delete?")
@@ -698,7 +702,7 @@ async def on_message(message):
                       color = colors[rarities.index(splits[1])]
                     else:
                       type=""
-                      if splits[2] == "pb":
+                      if splits[2] == "pba" or splits[2] == "pbn":
                         type = "Paintbrush 🖌️"
                       item = f"{splits[0]} {splits[1]} {type}"
                       color = 0x000000
@@ -727,23 +731,30 @@ async def on_message(message):
   if messagecontent.startswith(prefix+"use"):
     if trading() == "":
       splits = messagecontent.split()
-      if len(splits) > 1:
-        if splits[1].isnumeric():
+      if len(splits) == 3:
+        if splits[1].isnumeric() and splits[2].isnumeric():
           guild1, count1 = getItem(message.author.id, int(splits[1]))
+          guild2, count2 = getItem(message.author.id, int(splits[2]))
           if guild1 != False:
             if guild1 == "items":
-              im = db["players"][str(message.author.id)]["items"][count1-1].split("|")
-              usableItems = ["pb"]
-              if im[2] in usableItems:
-                pass
+              if guild2 != False:
+                if guild2 != "items":
+                  im = db["players"][str(message.author.id)]["items"][count1-1].split("|")
+                  usableItems = ["pba","pbn"]
+                  if im[2] in usableItems:
+                    pass
+                  else:
+                    await error(message, "This item can not be used")
+                else:
+                  await error(message, "You can not use an item on another item")
               else:
-                await error(message, "This item can not be used")
+                await error(message, "Item to use on does not exist")
             else:
               await error(message, "You can not use a collectable")
           else:
-            await error(message, "Item does not exist")
+            await error(message, "Item to use does not exist")
         else:
-          await error(message, "Item `ID` must be numeric")
+          await error(message, "Item `ID`s must be numeric")
       else:
         await error(message, "Please enter the `ID` of the item you want to use")
     else:
@@ -812,7 +823,7 @@ async def on_message(message):
               else:
                 type = ""
                 print(splits[2])
-                if splits[2] == "pb":
+                if splits[2] == "pba" or splits[2] == "pbn":
                   #LEFTOFF
                   type = "Paintbrush 🖌️"
                 scrapItem = f"{splits[0]} {splits[1]} {type}"
@@ -946,7 +957,7 @@ async def on_message(message):
                       color = colors[rarities.index(iSplit[1])]
                     else:
                       type=""
-                      if iSplit[2] == "pb":
+                      if iSplit[2] == "pba" or iSplit[2] == "pbn":
                         type1 = "Paintbrush 🖌️"
                       item1 = f"{iSplit[0]} {iSplit[1]} {type1}"
                       color = 0x000000
@@ -989,9 +1000,9 @@ async def on_message(message):
                       item2 = "`"+splits[2]+"` "+emojis[rarities.index(item2[1])] + item2[0] +" **["+ item2[1] +"]** "+ item2[2] +" "+ item2[3] +" "+ item2[4]
                     else:
                       type=""
-                      if item1[2] == "pb":
+                      if item1[2] == "pba" or item1[2] == "pbn":
                         type1 = "Paintbrush 🖌️"
-                      if item2[2] == "pb":
+                      if item2[2] == "pba" or item2[2] == "pbn":
                         type2 = "Paintbrush 🖌️"
                       item1 = f"{item1[0]} {item1[1]} {type1}"
                       item2 = f"{item2[0]} {item2[1]} {type2}"
@@ -1104,12 +1115,12 @@ async def on_message(message):
                   embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price+"\n"+desc,color=color)
                   
                 elif str(reaction.emoji) == "2️⃣":
-                  it = f"{genEmoji}|{genN}|pb"
+                  it = f"{genEmoji}|{genN}|pbn"
                   db["players"][str(message.author.id)]["items"].append(it)
                   embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price,color=0x000000)
                   
                 elif str(reaction.emoji) == "3️⃣":
-                  it = f"{genEmoji}|{genN}|pb"
+                  it = f"{genEmoji}|{genN}|pba"
                   db["players"][str(message.author.id)]["items"].append(it)
                   embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price,color=0x000000)
 
@@ -1229,7 +1240,7 @@ async def on_message(message):
                                     addItem = "`"+m.content+"` "+emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
                                   else:
                                     type=""
-                                    if splits[2] == "pb":
+                                    if splits[2] == "pba" or splits[2] == "pbn":
                                       type = "Paintbrush 🖌️"
                                     addItem = f"{splits[0]} {splits[1]} {type}"
                                   if m.author.id == message.author.id:
@@ -1285,7 +1296,7 @@ async def on_message(message):
                                     addItem = "`"+m.content+"` "+emojis[rarities.index(splits[1])] +" "+ splits[0]+" **["+splits[1]+"]** "+splits[2]+" "+splits[3]+" "+splits[4]
                                   else:
                                     type=""
-                                    if splits[2] == "pb":
+                                    if splits[2] == "pba" or splits[2] == "pbn":
                                       type = "Paintbrush 🖌️"
                                     addItem = f"{splits[0]} {splits[1]} {type}"
                                   if m.author.id == message.author.id:
