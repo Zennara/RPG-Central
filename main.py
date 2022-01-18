@@ -372,6 +372,7 @@ async def on_message(message):
     `{prefix}scrap <id>` - Scrap the item
     `{prefix}give <member> <id>` - Give the item to another player
     `{prefix}delete <id>` - Delete an item
+    `{prefix}use <id>` - Use a consumable item
 
     **Staff Commands**
     `{prefix}private` - Set your server to private
@@ -719,6 +720,32 @@ async def on_message(message):
           await error(message, "Item ID must be numeric.")
       else:
         await error(message, "Please specify the item ID and player mention.")
+    else:
+      await error(message, f"Current active trade [here]({trading()})")
+
+  #use an item
+  if messagecontent.startswith(prefix+"use"):
+    if trading() == "":
+      splits = messagecontent.split()
+      if len(splits) > 1:
+        if splits[1].isnumeric():
+          guild1, count1 = getItem(message.author.id, int(splits[1]))
+          if guild1 != False:
+            if guild1 == "items":
+              im = db["players"][str(message.author.id)]["items"][count1-1].split("|")
+              usableItems = ["pb"]
+              if im[2] in usableItems:
+                pass
+              else:
+                await error(message, "This item can not be used")
+            else:
+              await error(message, "You can not use a collectable")
+          else:
+            await error(message, "Item does not exist")
+        else:
+          await error(message, "Item `ID` must be numeric")
+      else:
+        await error(message, "Please enter the `ID` of the item you want to use")
     else:
       await error(message, f"Current active trade [here]({trading()})")
 
