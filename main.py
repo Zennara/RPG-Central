@@ -742,7 +742,13 @@ async def on_message(message):
                   im = db["players"][str(message.author.id)]["items"][count1-1].split("|")
                   usableItems = ["pba","pbn"]
                   if im[2] in usableItems:
-                    pass
+                    consumable = db["players"][str(message.author.id)][guild1][count1-1]
+                    consumable = consumable.split("|")
+                    itm = db["players"][str(message.author.id)][guild2][count2-1]
+                    if im[2] == "pba":
+                      pass
+                    elif im[2] == "pbn":
+                      pass
                   else:
                     await error(message, "This item can not be used")
                 else:
@@ -1120,7 +1126,7 @@ async def on_message(message):
                   embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price,color=0x000000)
                   
                 elif str(reaction.emoji) == "3️⃣":
-                  it = f"{genEmoji}|{genN}|pba"
+                  it = f"null|{genAdj}|pba"
                   db["players"][str(message.author.id)]["items"].append(it)
                   embed = discord.Embed(description="You bought a **" +boughtItem+ "** for " +price,color=0x000000)
 
