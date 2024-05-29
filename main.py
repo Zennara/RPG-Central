@@ -1,75 +1,70 @@
-# Discord.py Bot Template, by Zennara#8377
-# This template is a compilation of code to make it easier to design your own Discord.py Bot
-# I made this for my own use, but don't care who uses it, but please credit me if someone asks :)
-
-# imports
-import discord  # api
-import os  # for virtual environment secrets on replit
-import asyncio  # not needed unless creating loop tasks etc (you'll run into it)
-import json  # to write db to a json file
-import requests  # to check discord   api for limits/bans
-from replit import db  # database storage
+import discord
+import os
+import asyncio
+import json
 import random
 from datetime import datetime
 
-# api limit checker
-# rate limits occur when you access the api too much. You can view Discord.py's api below. There it will tell you whether an action will access the api.
-# https://discordpy.readthedocs.io/en/stable/api.html
-r = requests.head(url="https://discord.com/api/v1")
-try:
-    print(f"You are being Rate Limited : {int(r.headers['Retry-After']) / 60} minutes left")
-except:
-  print("No rate limit")
-
-# declare client
-intents = discord.Intents.all()  # declare what Intents you use, these will be checked in the Discord dev portal
+intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
 nonGuilds = ["trading", "items", "shows", "scrap"]
-
-# declare file lists
+chances = [50, 25, 12, 6, 3]
+rarities = ["Common", "Uncommon", "Rare", "Epic", "Legendary"]
+colors = [0x808080, 0x00FF00, 0x0000FF, 0x7851A9, 0xFFD700]
+emojis = ['⚪', '🟢', '🔵', '🟣', '🟡']
+additives = ["+0", "+1", "+2", "+3", "+4"]
+additiveChances = [50, 25, 12, 6, 3]
+scrapEmoji = "🔩"
+scrapAmounts = [10, 20, 30, 40, 50]
+multipliers = [1, 1.1, 1.25, 1.5, 2]
+chestprice = 50
+brushPrice = 10
+rerollPrice = 25
+chestChanceMAX = 33
+pageSize = 8
 adjectives = []
 items = []
 encounters = []
 showoffs = []
 
 
+def load_file(filename):
+    try:
+        with open(filename, encoding="utf-8") as file:
+            return [line.strip() for line in file.readlines()]
+    except FileNotFoundError:
+        print(f"Error: {filename} not found.")
+        return []
+    except UnicodeDecodeError:
+        print(f"Error: {filename} contains invalid characters.")
+        return []
+
+
+def update_data():
+    global data
+    with open("data.json", "w", encoding="utf-8") as outfile:
+        json.dump(data, outfile, indent=2)
+    with open('data.json', encoding="utf-8") as f:
+        data = json.load(f)
+
+
 @client.event
 async def on_ready():
+    global adjectives, items, encounters, showoffs
     print("\nRPG Central Ready.\n")
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="intense d&d"))
-    # adjectives
-    with open("adjectives.txt") as file:
-        adj = file.readlines()
-        global adjectives
-        adjectives = [line.rstrip() for line in adj]
-    # items
-    with open("items.txt") as file:
-        itm = file.readlines()
-        global items
-        items = [line.rstrip() for line in itm]
-    # encounters
-    with open("encounters.txt") as file:
-        encounter = file.readlines()
-        global encounters
-        encounters = [line.rstrip() for line in encounter]
-    # showoffs
-    with open("showoffs.txt") as file:
-        showoff = file.readlines()
-        global showoffs
-        showoffs = [line.rstrip() for line in showoff]
-
-    # reset trading
-    for member in db["players"]:
-        db["players"][str(member)]["trading"] = ""
-        # db["players"][str(member)]["items"] = []
-        # db["players"][str(member)]["shows"] = {}
+    adjectives = load_file("adjectives.txt")
+    items = load_file("items.txt")
+    encounters = load_file("encounters.txt")
+    showoffs = load_file("showoffs.txt")
+    for member in data["players"]:
+        data["players"][str(member)]["trading"] = ""
+    update_data()
 
 
 async def error(message, code):
     embed = discord.Embed(color=0xff0000, description=code)
-    # if random.randint(1,3) == 1:
-    #  embed.add_field(name="᲼",value="\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
     await message.channel.send(embed=embed)
 
 
@@ -78,62 +73,7 @@ def checkPerms(message):
         return True
     else:
         asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
-
-
-def giveOP(owner):
-    adj = "Unobtainable Zenn's"
-    itm = "💎Gem"
-    item = ""
-    emoji = ""
-    for i in itm:
-        if i.isalpha() or i == " ":
-            item = item + i
-        else:
-            emoji = emoji + i
-    rarity = "Epic"
-    color = colors[rarities.index(rarity)]
-    addition = "+5"
-    op = emoji + "|" + rarity + "|" + adj + "|" + item + "|" + addition
-    db["players"][str(owner)][str(806706495466766366)].append(op)
-
-
-def getItem(player, id):
-    count = 0
-    count2 = 0
-    if str(player) in db["players"]:
-        for guild in db["players"][str(player)]:
-            if guild not in nonGuilds or guild == "items":
-                count2 = 0
-                for item in db["players"][str(player)][guild]:
-                    count += 1
-                    count2 += 1
-                    if id == count:
-                        return guild, count2
-    return False, False
-
-
-# chances, from common to legendary, left to right
-# must be in order from least to most rare
-chances = [50, 25, 12, 6, 3]
-rarities = ["Common", "Uncommon", "Rare", "Epic", "Legendary"]
-
-colors = [0x808080, 0x00FF00, 0x0000FF, 0x7851A9, 0xFFD700]
-emojis = ['⚪', '🟢', '🔵', '🟣', '🟡']
-
-additives = ["+0", "+1", "+2", "+3", "+4"]
-additiveChances = [50, 25, 12, 6, 3]
-
-scrapEmoji = "🔩"
-scrapAmounts = [10, 20, 30, 40, 50]
-multipliers = [1, 1.1, 1.25, 1.5, 2]
-
-chestprice = 50
-brushPrice = 10
-rerollPrice = 25
-
-chestChanceMAX = 33
-
-pageSize = 8
+        return False
 
 
 async def checkZen(message):
@@ -141,6 +81,22 @@ async def checkZen(message):
         return True
     else:
         await error(message, "You must be the application owner to use this.")
+        return False
+
+
+def getItem(player, id):
+    count = 0
+    count2 = 0
+    if str(player) in data["players"]:
+        for guild in data["players"][str(player)]:
+            if guild not in nonGuilds or guild == "items":
+                count2 = 0
+                for item in data["players"][str(player)][guild]:
+                    count += 1
+                    count2 += 1
+                    if id == count:
+                        return guild, count2
+    return False, False
 
 
 def openChest():
@@ -165,43 +121,47 @@ def openChest():
 
 @client.event
 async def on_message(message):
+    if message.author.id == client.user.id or message.author.bot:
+        return
+
+    print(f"\n[{message.guild.name}]-{message.author.name}: {message.content}")
+
+    if str(message.guild.id) not in data:
+        data[str(message.guild.id)] = {"prefix": "!", "name": message.guild.name, "join": False}
+        update_data()
+
+    prefix = data[str(message.guild.id)]["prefix"]
+    messagecontent = message.content.lower()
+
+    # Add your commands here
     if message.author.id == client.user.id:
         print("BOT MESSAGE")
     else:
         print(f"\n[{message.guild.name}]-{message.author.name}: {message.content}")
 
-    # check for bots
+        # check for bots
     if message.author.bot:
         return
-
-    # convert the message to all lowercase
-    messagecontent = message.content.lower()
-
-    # check if in server
-    if str(message.guild.id) not in db:
-        db[str(message.guild.id)] = {"prefix": "!", "name": message.guild.name, "join": False}
-
-    # get prefix
-    prefix = db[str(message.guild.id)]["prefix"]
 
     # this will clear the database if something is broken, WARNING: will delete all entries
     if messagecontent == prefix + "clear":
         if await checkZen(message):
-            for key in db.keys():
-                del db[key]
+            for key in data.keys():
+                del data[key]
             # my database entries are seperates by server id for each key. this works MOST of the time unless you have a large amount of data
-            db[str(message.guild.id)] = {"prefix": "!", "name": message.guild.name, "join": False}
-            db["players"] = {}
+            data[str(message.guild.id)] = {"prefix": "!", "name": message.guild.name, "join": False}
+            data["players"] = {}
             embed = discord.Embed(description="🆑 **Database was cleared**")
             await message.channel.send(embed=embed)
+            update_data()
 
     # this is to dump your databse into database.json. Change this to FALSE to stop this.
-    DUMP = True
+    DUMP = False
     if DUMP:
         data2 = {}
         count = 0
-        for key in db.keys():
-            data2[str(key)] = db[str(key)]
+        for key in data.keys():
+            data2[str(key)] = data[str(key)]
             count += 1
 
         with open("database.json", 'w') as f:
@@ -209,8 +169,8 @@ async def on_message(message):
 
     # get trading bool
     def trading():
-        if str(message.author.id) in db["players"]:
-            return db["players"][str(message.author.id)]["trading"]
+        if str(message.author.id) in data["players"]:
+            return data["players"][str(message.author.id)]["trading"]
         else:
             return ""
 
@@ -221,11 +181,12 @@ async def on_message(message):
             if not any(x in messagecontent[len(prefix) + 7:] for x in ["`", ">", "@", "*", "~", "_", " "]):
                 if len(messagecontent) <= len(prefix) + 10:
                     if len(messagecontent.split()) > 1:
-                        db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
+                        data[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
                         embed = discord.Embed(color=0x00FF00,
                                               description="Prefix is now `" + message.content.split()[1:][0] + "`")
                         embed.set_author(name="Prefix Change")
                         await message.channel.send(embed=embed)
+                        update_data()
                 else:
                     await error(message, "Prefix must be between `1` and `3` characters.")
             else:
@@ -240,7 +201,7 @@ async def on_message(message):
                 if guild1 != False:
                     print(guild1)
                     print(count1)
-                    item = db["players"][str(message.author.id)][guild1][count1 - 1]
+                    item = data["players"][str(message.author.id)][guild1][count1 - 1]
                     splits = item.split("|")
                     if len(splits) == 5:
                         item = splits[0] + " **[" + splits[1] + "]** " + splits[2] + " " + splits[3] + " " + splits[4]
@@ -292,12 +253,13 @@ async def on_message(message):
                             # send message
                             embed = discord.Embed(title="🧬 Item Generated", description=desc, color=color)
                             await message.channel.send(embed=embed)
-                            if str(message.author.id) not in db["players"]:
-                                db["players"][str(message.author.id)] = {"scrap": 0, "trading": "", "items": [],
-                                                                         "shows": {}}
-                            if str(message.guild.id) not in db["players"][str(message.author.id)]:
-                                db["players"][str(message.author.id)][str(message.guild.id)] = []
-                            db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+                            if str(message.author.id) not in data["players"]:
+                                data["players"][str(message.author.id)] = {"scrap": 0, "trading": "", "items": [],
+                                                                           "shows": {}}
+                            if str(message.guild.id) not in data["players"][str(message.author.id)]:
+                                data["players"][str(message.author.id)][str(message.guild.id)] = []
+                            data["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+                            update_data()
                         else:
                             await error(message, "Invalid additive")
                     else:
@@ -330,13 +292,14 @@ async def on_message(message):
             embed = discord.Embed(description=desc, color=color)
             embed.set_author(name=user.name + " Opened:", icon_url=user.avatar_url)
             await msg.edit(embed=embed)
-            # find user in db
-            if str(user.id) not in db["players"]:
-                db["players"][str(user.id)] = {"scrap": 0, "trading": "", "items": [], "shows": {}}
-            if str(message.guild.id) not in db["players"][str(user.id)]:
-                db["players"][str(user.id)][str(message.guild.id)] = []
+            # find user in data
+            if str(user.id) not in data["players"]:
+                data["players"][str(user.id)] = {"scrap": 0, "trading": "", "items": [], "shows": {}}
+            if str(message.guild.id) not in data["players"][str(user.id)]:
+                data["players"][str(user.id)][str(message.guild.id)] = []
             # give item
-            db["players"][str(user.id)][str(message.guild.id)].append(fullItem)
+            data["players"][str(user.id)][str(message.guild.id)].append(fullItem)
+            update_data()
 
     # chest manually
     if messagecontent == prefix + "chest":
@@ -371,38 +334,39 @@ async def on_message(message):
                 description="Thank you, " + m1.author.mention + ", for embracing the universe in your arms.\n*Here is your crown.*",
                 title="👑 A Ruler is Crowned", color=0xFFD700)
             await msg.edit(embed=embed)
-            if str(m1.author.id) not in db["players"]:
-                db["players"][str(m1.author.id)] = {"scrap": 0, "trading": "", "items": [], "shows": {}}
-            if str(message.guild.id) not in db["players"][str(m1.author.id)]:
-                db["players"][str(m1.author.id)][str(message.guild.id)] = []
-            db["players"][str(m1.author.id)][str(message.guild.id)].append(
+            if str(m1.author.id) not in data["players"]:
+                data["players"][str(m1.author.id)] = {"scrap": 0, "trading": "", "items": [], "shows": {}}
+            if str(message.guild.id) not in data["players"][str(m1.author.id)]:
+                data["players"][str(m1.author.id)][str(message.guild.id)] = []
+            data["players"][str(m1.author.id)][str(message.guild.id)].append(
                 "👑|Legendary|*Crown of the Supreme*|**Overlord**|+4")
+            update_data()
 
     # help
     if messagecontent == prefix + "help":
         text = f"""
-    **Member Commands**
-    `{prefix}help [command]` - Displays this message
-    `{prefix}prefix <new>` - Changes the command prefix
-    `{prefix}bag` - Show all of your items
-    `{prefix}pocket` - Show all your items from this server
-    `{prefix}shop` - View the marketplace
-    `{prefix}showoff <id>` - Brag about an item
-    `{prefix}trade <member>` - Start a trade with another player
-    `{prefix}distill <id>` - Change the adjective of your item
-    `{prefix}transmute <id>` - Change the object of your item
-    `{prefix}scrap <id>` - Scrap the item
-    `{prefix}give <member> <id>` - Give the item to another player
-    `{prefix}delete <id>` - Delete an item
-    `{prefix}use <item> <collectable>` - Use a consumable item
+        **Member Commands**
+        `{prefix}help [command]` - Displays this message
+        `{prefix}prefix <new>` - Changes the command prefix
+        `{prefix}bag` - Show all of your items
+        `{prefix}pocket` - Show all your items from this server
+        `{prefix}shop` - View the marketplace
+        `{prefix}showoff <id>` - Brag about an item
+        `{prefix}trade <member>` - Start a trade with another player
+        `{prefix}distill <id>` - Change the adjective of your item
+        `{prefix}transmute <id>` - Change the object of your item
+        `{prefix}scrap <id>` - Scrap the item
+        `{prefix}give <member> <id>` - Give the item to another player
+        `{prefix}delete <id>` - Delete an item
+        `{prefix}use <item> <collectable>` - Use a consumable item
 
-    **Staff Commands**
-    `{prefix}private` - Set your server to private
-    `{prefix}public` - Set your server to public
+        **Staff Commands**
+        `{prefix}private` - Set your server to private
+        `{prefix}public` - Set your server to public
 
-    **Created by Zennara#8377**
-    Invite the bot [here](https://discord.com/api/oauth2/authorize?client_id=929935460699082782&permissions=140929002609&scope=bot)
-    """
+        **Created by Zennara#8377**
+        Invite the bot [here](https://discord.com/api/oauth2/authorize?client_id=929935460699082782&permissions=140929002609&scope=bot)
+        """
         embed = discord.Embed(description=text, color=0x000000)
         embed.set_footer(text="<> - Required | [] - Optional")
         await message.channel.send(embed=embed)
@@ -415,64 +379,64 @@ async def on_message(message):
             cmd = commands.index(messagecontent.split()[1])
             if cmd == 0:
                 text = f"""
-        This shows a page with all of the available commands. Anything wrapped in `<` and `>` are **required** arguments, while anything wrapped in `[` and `]` are **optional** arguments. An argument is a value you put into the command like information, a member, or an ID. You can find more help in my [discord server](https://discord.gg/y5FJsThMsc).
-        """
+            This shows a page with all of the available commands. Anything wrapped in `<` and `>` are **required** arguments, while anything wrapped in `[` and `]` are **optional** arguments. An argument is a value you put into the command like information, a member, or an ID. You can find more help in my [discord server](https://discord.gg/y5FJsThMsc).
+            """
             elif cmd == 1:
                 text = f"""
-        This command will change the prefix for your server. Every server with this bot can have their own, custom prefix. {message.guild.name}'s prefix is currently `{prefix}`
-        """
+            This command will change the prefix for your server. Every server with this bot can have their own, custom prefix. {message.guild.name}'s prefix is currently `{prefix}`
+            """
             elif cmd == 2:
                 text = f"""
-        This will show you all of the contents of your inventory across all servers. You can find your **items** and **scrap** {scrapEmoji} here. Items are seperated by server. If the server you found an item in is a public server, a hyperlink to that server will be it's name.
-        """
+            This will show you all of the contents of your inventory across all servers. You can find your **items** and **scrap** {scrapEmoji} here. Items are seperated by server. If the server you found an item in is a public server, a hyperlink to that server will be it's name.
+            """
             elif cmd == 3:
                 text = f"""
-        This will show you your inventory in a more simplified version. Only the items from the current server you used the command in will be shown.
-        """
+            This will show you your inventory in a more simplified version. Only the items from the current server you used the command in will be shown.
+            """
             elif cmd == 4:
                 text = f"""
-        This opens the **shop**. You can buy chests here for new items with your **scrap** {scrapEmoji}. The current price is {chestprice} {scrapEmoji}.
-        """
+            This opens the **shop**. You can buy chests here for new items with your **scrap** {scrapEmoji}. The current price is {chestprice} {scrapEmoji}.
+            """
             elif cmd == 5:
                 text = f"""
-        This initiates a trade with another player. If they accept, you can add and remove **items** or **scrap** {scrapEmoji} to trade. To accept a trade, react with ✅. To cancel your acceptance or to cancel the trade, react with ❌. When both player confirm the trade, the agreed upon items will be transferred.
-        """
+            This initiates a trade with another player. If they accept, you can add and remove **items** or **scrap** {scrapEmoji} to trade. To accept a trade, react with ✅. To cancel your acceptance or to cancel the trade, react with ❌. When both player confirm the trade, the agreed upon items will be transferred.
+            """
             elif cmd == 6:
                 text = f"""
-        This will give you a chance to get a new **adjective** for your item. Currently this costs {rerollPrice} {scrapEmoji}.
-        """
+            This will give you a chance to get a new **adjective** for your item. Currently this costs {rerollPrice} {scrapEmoji}.
+            """
             elif cmd == 7:
                 text = f"""
-        This will give you a chance to get a new **noun** and **emoji** for your item. Currently this costs {rerollPrice} {scrapEmoji}.
-        """
+            This will give you a chance to get a new **noun** and **emoji** for your item. Currently this costs {rerollPrice} {scrapEmoji}.
+            """
             elif cmd == 8:
                 text = f"""
-        This will scrap the item with the `id` you inputted. A confirmation message will appear with the amount it is scrapped for. Scrap prices are determined by the **rarity** and multiplied by the **addition** (+-).
-        """
+            This will scrap the item with the `id` you inputted. A confirmation message will appear with the amount it is scrapped for. Scrap prices are determined by the **rarity** and multiplied by the **addition** (+-).
+            """
             elif cmd == 9:
                 text = f"""
-        This will give the item matching the `id` to the designated `member`. You can use the members **mention** or **id** for the command.
-        """
+            This will give the item matching the `id` to the designated `member`. You can use the members **mention** or **id** for the command.
+            """
             elif cmd == 10:
                 text = f"""
-        This will delete the item matching the `id`. Warning: this **can not** be undone.
-        """
+            This will delete the item matching the `id`. Warning: this **can not** be undone.
+            """
             elif cmd == 11:
                 text = f"""
-        Set your server to `private`. This **will not allow** users from other guilds to join off items and bags. This will also delete any valid invite links created by {client.user.name}. Only usable by members with the `Manage_Guild` permission.
-        """
+            Set your server to `private`. This **will not allow** users from other guilds to join off items and bags. This will also delete any valid invite links created by {client.user.name}. Only usable by members with the `Manage_Guild` permission.
+            """
             elif cmd == 12:
                 text = f"""
-        Set your server to `public`. This **will allow** users from other guilds to join off items and bags. Only usable by members with the `Manage_Guild` permission.
-        """
+            Set your server to `public`. This **will allow** users from other guilds to join off items and bags. Only usable by members with the `Manage_Guild` permission.
+            """
             elif cmd == 13:
                 text = f"""
-        Shows off an item from the `id` and displays it in the channel along with a randomly generated message.
-        """
+            Shows off an item from the `id` and displays it in the channel along with a randomly generated message.
+            """
             elif cmd == 14:
                 text = f"""
-        Uses an item from your consumable items list. This includes **Paintbrushes**.
-        """
+            Uses an item from your consumable items list. This includes **Paintbrushes**.
+            """
 
             # send command
             embed = discord.Embed(description=text, color=0x000000,
@@ -482,9 +446,10 @@ async def on_message(message):
     # private
     if messagecontent == prefix + "private":
         if checkPerms(message):
-            if db[str(message.guild.id)]["join"] == True:
+            if data[str(message.guild.id)]["join"] == True:
                 embed = discord.Embed(description="🔒 Your server is now private on **" + client.user.name + "**.")
-                db[str(message.guild.id)]["join"] = False
+                data[str(message.guild.id)]["join"] = False
+                update_data()
                 for invite in await message.guild.invites():
                     if invite.inviter.id == client.user.id:
                         await invite.delete(reason="Server set to private")
@@ -498,10 +463,11 @@ async def on_message(message):
     # private
     if messagecontent == prefix + "public":
         if checkPerms(message):
-            if db[str(message.guild.id)]["join"] == False:
+            if data[str(message.guild.id)]["join"] == False:
                 embed = discord.Embed(description="🔓 Your server is now public on **" + client.user.name + "**.",
                                       color=0x000000)
-                db[str(message.guild.id)]["join"] = True
+                data[str(message.guild.id)]["join"] = True
+                update_data()
             else:
                 embed = discord.Embed(description="🔓 Your server is already public on **" + client.user.name + "**.",
                                       color=0x000000)
@@ -532,22 +498,22 @@ async def on_message(message):
                 itemsOnPage = 0
                 scrapAmount = "0"
                 # check if in database
-                if str(usr.id) in db["players"]:
-                    scrapAmount = str(db["players"][str(usr.id)]["scrap"])
-                    for guild in db["players"][str(usr.id)]:
+                if str(usr.id) in data["players"]:
+                    scrapAmount = str(data["players"][str(usr.id)]["scrap"])
+                    for guild in data["players"][str(usr.id)]:
                         if itemsOnPage >= pageSize:
                             break
                         if guild not in nonGuilds or guild == "items":
-                            if db["players"][str(usr.id)][guild]:
+                            if data["players"][str(usr.id)][guild]:
                                 if page * pageSize - (pageSize) <= count <= page * pageSize:
                                     # get invite link
                                     if guild == "items":
                                         link = "Items"
                                     else:
-                                        link = db[str(guild)]["name"]
+                                        link = data[str(guild)]["name"]
                                     try:
                                         done = False
-                                        if db[str(guild)]["join"] == True:
+                                        if data[str(guild)]["join"] == True:
                                             g = client.get_guild(int(guild))
                                             for invite in await g.invites():
                                                 if invite.inviter.id == client.user.id:
@@ -567,7 +533,7 @@ async def on_message(message):
                                     elif messagecontent.startswith(prefix + "bag"):
                                         texts = texts + "**" + link + "**\n"
 
-                                for item in db["players"][str(usr.id)][guild]:
+                                for item in data["players"][str(usr.id)][guild]:
                                     if itemsOnPage >= pageSize:
                                         break
                                     count += 1
@@ -651,10 +617,10 @@ async def on_message(message):
             if len(splits) == 2:
                 if splits[1].isnumeric():
                     id = int(splits[1])
-                    if str(message.author.id) in db["players"]:
+                    if str(message.author.id) in data["players"]:
                         guild1, count1 = getItem(message.author.id, id)
                         if guild1 != False:
-                            splits = db["players"][str(message.author.id)][guild1][count1 - 1].split("|")
+                            splits = data["players"][str(message.author.id)][guild1][count1 - 1].split("|")
                             if len(splits) == 5:
                                 deletedItem = splits[0] + " **[" + splits[1] + "]** " + splits[2] + " " + splits[
                                     3] + " " + splits[4]
@@ -678,6 +644,9 @@ async def on_message(message):
                                             asyncio.create_task(reaction.message.clear_reactions())
                                             return True
 
+                            user2 = ""
+                            tt = False
+
                             await msg.add_reaction("✅")
                             await msg.add_reaction("⚫")
                             await msg.add_reaction("❌")
@@ -697,7 +666,8 @@ async def on_message(message):
                                         done = True
                                         break
                             if not done:
-                                del db["players"][str(message.author.id)][guild1][count1 - 1]
+                                del data["players"][str(message.author.id)][guild1][count1 - 1]
+                                update_data()
                                 embed = discord.Embed(description=deletedItem, color=0x000000, title="🗑️ Item deleted.")
                                 await msg.edit(embed=embed)
                             else:
@@ -727,16 +697,17 @@ async def on_message(message):
                             mbr = message.guild.get_member(int(mbr))
                             if mbr.id != message.author.id:
                                 guild1, count1 = getItem(message.author.id, int(splits[2]))
-                                if str(message.author.id) in db["players"]:
+                                if str(message.author.id) in data["players"]:
                                     if guild1 != False:
-                                        item = db["players"][str(message.author.id)][guild1][count1 - 1]
-                                        del db["players"][str(message.author.id)][guild1][count1 - 1]
-                                        if str(mbr.id) not in db["players"]:
-                                            db["players"][str(mbr.id)] = {"scrap": 0, "trading": "", "items": [],
-                                                                          "shows": {}}
-                                        if guild1 not in db["players"][str(mbr.id)]:
-                                            db["players"][str(mbr.id)][guild1] = []
-                                        db["players"][str(mbr.id)][guild1].append(item)
+                                        item = data["players"][str(message.author.id)][guild1][count1 - 1]
+                                        del data["players"][str(message.author.id)][guild1][count1 - 1]
+                                        if str(mbr.id) not in data["players"]:
+                                            data["players"][str(mbr.id)] = {"scrap": 0, "trading": "", "items": [],
+                                                                            "shows": {}}
+                                        if guild1 not in data["players"][str(mbr.id)]:
+                                            data["players"][str(mbr.id)][guild1] = []
+                                        data["players"][str(mbr.id)][guild1].append(item)
+                                        update_data()
                                         splits = item.split("|")
                                         if len(splits) == 5:
                                             item = splits[0] + " **[" + splits[1] + "]** " + splits[2] + " " + splits[
@@ -782,10 +753,10 @@ async def on_message(message):
                         if guild1 == "items":
                             if guild2 != False:
                                 if guild2 != "items":
-                                    consumable = db["players"][str(message.author.id)]["items"][count1 - 1].split("|")
+                                    consumable = data["players"][str(message.author.id)]["items"][count1 - 1].split("|")
                                     usableItems = ["pba", "pbn"]
                                     if consumable[2] in usableItems:
-                                        itm = db["players"][str(message.author.id)][guild2][count2 - 1].split("|")
+                                        itm = data["players"][str(message.author.id)][guild2][count2 - 1].split("|")
                                         rarity = itm[1]
                                         noun = itm[3]
                                         emoji = itm[0]
@@ -802,8 +773,9 @@ async def on_message(message):
                                         embed = discord.Embed(title="🖌️ Paintbrush Used",
                                                               description=f"{newItemDisplay}", color=color)
                                         await message.channel.send(embed=embed)
-                                        del db["players"][str(message.author.id)]["items"][count1 - 1]
-                                        db["players"][str(message.author.id)][guild2][count2 - 1] = newItemLog
+                                        del data["players"][str(message.author.id)]["items"][count1 - 1]
+                                        data["players"][str(message.author.id)][guild2][count2 - 1] = newItemLog
+                                        update_data()
                                     else:
                                         await error(message, "This item can not be used")
                                 else:
@@ -834,17 +806,18 @@ async def on_message(message):
                             if splits[2].isnumeric():
                                 amount = int(splits[2])
                                 if amount > 0:
-                                    if str(message.author.id) in db["players"]:
-                                        scrap = db["players"][str(message.author.id)]["scrap"]
+                                    if str(message.author.id) in data["players"]:
+                                        scrap = data["players"][str(message.author.id)]["scrap"]
                                         if scrap >= amount:
-                                            if splits[1] not in db["players"]:
-                                                db["players"][str(mbr.id)] = {"scrap": 0, "trading": "", "items": [],
-                                                                              "shows": {}}
+                                            if splits[1] not in data["players"]:
+                                                data["players"][str(mbr.id)] = {"scrap": 0, "trading": "", "items": [],
+                                                                                "shows": {}}
                                             # gave amount to user
-                                            db["players"][str(mbr.id)]["scrap"] = db["players"][str(mbr.id)][
-                                                                                      "scrap"] + amount
+                                            data["players"][str(mbr.id)]["scrap"] = data["players"][str(mbr.id)][
+                                                                                        "scrap"] + amount
                                             # subtract amount
-                                            db["players"][str(message.author.id)]["scrap"] = scrap - amount
+                                            data["players"][str(message.author.id)]["scrap"] = scrap - amount
+                                            update_data()
                                             # confirmation message
                                             embed = discord.Embed(color=0x000000, description="gave **" + str(
                                                 amount) + "** " + scrapEmoji + " to:")
@@ -877,10 +850,10 @@ async def on_message(message):
             splits = messagecontent.split()
             if len(splits) == 2:
                 if splits[1].isnumeric():
-                    if str(message.author.id) in db["players"]:
+                    if str(message.author.id) in data["players"]:
                         guild1, count1 = getItem(message.author.id, int(splits[1]))
                         if guild1 != False:
-                            splits = db["players"][str(message.author.id)][guild1][count1 - 1].split("|")
+                            splits = data["players"][str(message.author.id)][guild1][count1 - 1].split("|")
 
                             if len(splits) != 3:
                                 scrapItem = emojis[rarities.index(splits[1])] + " " + splits[0] + " **[" + splits[
@@ -931,8 +904,9 @@ async def on_message(message):
                                         done = True
                                         break
                             if not done:
-                                del db["players"][str(message.author.id)][guild1][count1 - 1]
-                                db["players"][str(message.author.id)]["scrap"] += scrapAmount
+                                del data["players"][str(message.author.id)][guild1][count1 - 1]
+                                data["players"][str(message.author.id)]["scrap"] += scrapAmount
+                                update_data()
                                 embed = discord.Embed(description=scrapItem, color=0x000000,
                                                       title="⚙️ Item was scrapped for " + str(scrapAmount) + scrapEmoji)
                                 await msg.edit(embed=embed)
@@ -961,12 +935,12 @@ async def on_message(message):
                     if guild1 != False:
                         if guild1 != "items":
                             if splits[0] == prefix + "distill" or splits[0] == prefix + "transmute":
-                                scrap = db["players"][str(message.author.id)]["scrap"]
+                                scrap = data["players"][str(message.author.id)]["scrap"]
                                 if scrap >= rerollPrice:
-                                    db["players"][str(message.author.id)]["scrap"] = scrap - rerollPrice
+                                    data["players"][str(message.author.id)]["scrap"] = scrap - rerollPrice
                                     item = ""
                                     emoji = ""
-                                    splitItem = db["players"][str(message.author.id)][guild1][count1 - 1].split("|")
+                                    splitItem = data["players"][str(message.author.id)][guild1][count1 - 1].split("|")
                                     adj = splitItem[2]
                                     item = splitItem[3]
                                     emoji = splitItem[0]
@@ -988,8 +962,9 @@ async def on_message(message):
                                     addition = splitItem[4]
                                     desc = emoji + " **[" + rarity + "]** " + adj + " " + item + " " + addition
                                     fullItem = emoji + "|" + rarity + "|" + adj + "|" + item + "|" + addition
-                                    db["players"][str(message.author.id)][guild1].insert(count1 - 1, fullItem)
-                                    db["players"][str(message.author.id)][guild1].pop(count1)
+                                    data["players"][str(message.author.id)][guild1].insert(count1 - 1, fullItem)
+                                    data["players"][str(message.author.id)][guild1].pop(count1)
+                                    update_data()
                                     embed = discord.Embed(description=desc, title="Item " + ("Distilled" if splits[
                                                                                                                 0] == prefix + "distill" else "Transmuted") + " for " + str(
                                         rerollPrice) + " " + scrapEmoji, color=color)
@@ -1016,16 +991,17 @@ async def on_message(message):
             if len(splits) == 3:
                 if splits[1].isnumeric():
                     if splits[2].isnumeric():
-                        if str(message.author.id) in db["players"]:
+                        if str(message.author.id) in data["players"]:
                             guild1, count1 = getItem(message.author.id, int(splits[1]))
                             if guild1 != False:
                                 guild2, count2 = getItem(message.author.id, int(splits[2]))
                                 if guild2 != False:
                                     if guild1 == guild2:
-                                        insertItem = db["players"][str(message.author.id)][guild1][count1 - 1]
-                                        db["players"][str(message.author.id)][guild1].pop(count1 - 1)
-                                        db["players"][str(message.author.id)][guild1].insert(count2 - 1, insertItem)
-                                        iSplit = db["players"][str(message.author.id)][guild1][count2 - 1].split("|")
+                                        insertItem = data["players"][str(message.author.id)][guild1][count1 - 1]
+                                        data["players"][str(message.author.id)][guild1].pop(count1 - 1)
+                                        data["players"][str(message.author.id)][guild1].insert(count2 - 1, insertItem)
+                                        iSplit = data["players"][str(message.author.id)][guild1][count2 - 1].split("|")
+                                        update_data()
                                         if len(iSplit) == 5:
                                             item1 = emojis[rarities.index(iSplit[1])] + " " + iSplit[0] + " **[" + \
                                                     iSplit[1] + "]** " + iSplit[2] + " " + iSplit[3] + " " + iSplit[4]
@@ -1064,14 +1040,14 @@ async def on_message(message):
             if len(splits) == 3:
                 if splits[1].isnumeric():
                     if splits[2].isnumeric():
-                        if str(message.author.id) in db["players"]:
+                        if str(message.author.id) in data["players"]:
                             guild1, count1 = getItem(message.author.id, int(splits[1]))
                             if guild1 != False:
                                 guild2, count2 = getItem(message.author.id, int(splits[2]))
                                 if guild2 != False:
                                     if guild1 == guild2:
-                                        item1 = db["players"][str(message.author.id)][guild1][count1 - 1].split("|")
-                                        item2 = db["players"][str(message.author.id)][guild2][count2 - 1].split("|")
+                                        item1 = data["players"][str(message.author.id)][guild1][count1 - 1].split("|")
+                                        item2 = data["players"][str(message.author.id)][guild2][count2 - 1].split("|")
                                         if len(item1) == 5:
                                             item1 = "`" + splits[1] + "` " + emojis[rarities.index(item1[1])] + item1[
                                                 0] + " **[" + item1[1] + "]** " + item1[2] + " " + item1[3] + " " + \
@@ -1087,10 +1063,11 @@ async def on_message(message):
                                                 type2 = "Paintbrush 🖌️"
                                             item1 = f"{item1[0]} {item1[1]} {type1}"
                                             item2 = f"{item2[0]} {item2[1]} {type2}"
-                                        db["players"][str(message.author.id)][guild1][count1 - 1], \
-                                            db["players"][str(message.author.id)][guild2][count2 - 1] = \
-                                            db["players"][str(message.author.id)][guild2][count2 - 1], \
-                                                db["players"][str(message.author.id)][guild1][count1 - 1]
+                                        data["players"][str(message.author.id)][guild1][count1 - 1], \
+                                            data["players"][str(message.author.id)][guild2][count2 - 1] = \
+                                            data["players"][str(message.author.id)][guild2][count2 - 1], \
+                                                data["players"][str(message.author.id)][guild1][count1 - 1]
+                                        update_data()
                                         embed = discord.Embed(color=0x000000, title="🔀 **Swapped**",
                                                               description=item1 + "\n**with**\n" + item2)
                                         await message.channel.send(embed=embed)
@@ -1136,8 +1113,8 @@ async def on_message(message):
     if messagecontent == prefix + "shop":
         if trading() == "":
             scrap = 0
-            if str(message.author.id) in db["players"]:
-                scrap = db["players"][str(message.author.id)]["scrap"]
+            if str(message.author.id) in data["players"]:
+                scrap = data["players"][str(message.author.id)]["scrap"]
             embed2 = discord.Embed(color=0x000000, description="```\n▌      Welcome to the shop      ▐\n```")
             embed2.set_author(name="🛒 Marketplace")
 
@@ -1192,35 +1169,37 @@ async def on_message(message):
                             price = prices[numbers.index(str(reaction.emoji))]
                             print(price)
                             if scrap >= int(price[:-2]):
-                                db["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-2])
-                                # find user in db
-                                if str(message.author.id) not in db["players"]:
-                                    db["players"][str(message.author.id)] = {"scrap": 0, "trading": "", "items": [],
-                                                                             "shows": {}}
-                                if str(message.guild.id) not in db["players"][str(message.author.id)]:
-                                    db["players"][str(message.author.id)][str(message.guild.id)] = []
+                                data["players"][str(message.author.id)]["scrap"] = scrap - int(price[:-2])
+                                # find user in data
+                                if str(message.author.id) not in data["players"]:
+                                    data["players"][str(message.author.id)] = {"scrap": 0, "trading": "", "items": [],
+                                                                               "shows": {}}
+                                if str(message.guild.id) not in data["players"][str(message.author.id)]:
+                                    data["players"][str(message.author.id)][str(message.guild.id)] = []
 
                                 if str(reaction.emoji) == "1️⃣":
                                     desc, color, fullItem = openChest()
                                     # give item
-                                    db["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
+                                    data["players"][str(message.author.id)][str(message.guild.id)].append(fullItem)
                                     embed = discord.Embed(
                                         description="You bought a **" + boughtItem + "** for " + price + "\n" + desc,
                                         color=color)
 
                                 elif str(reaction.emoji) == "2️⃣":
                                     it = f"{genEmoji}|{genN}|pbn"
-                                    db["players"][str(message.author.id)]["items"].append(it)
+                                    data["players"][str(message.author.id)]["items"].append(it)
                                     embed = discord.Embed(
                                         description="You bought a **" + boughtItem + "** for " + price, color=0x000000)
 
                                 elif str(reaction.emoji) == "3️⃣":
                                     it = f"null|{genAdj}|pba"
-                                    db["players"][str(message.author.id)]["items"].append(it)
+                                    data["players"][str(message.author.id)]["items"].append(it)
                                     embed = discord.Embed(
                                         description="You bought a **" + boughtItem + "** for " + price, color=0x000000)
 
-                                scrap = db["players"][str(message.author.id)]["scrap"]
+                                update_data()
+
+                                scrap = data["players"][str(message.author.id)]["scrap"]
                                 await message.channel.send(embed=embed)
                                 embed2.set_footer(text="Scrap: " + str(scrap) + scrapEmoji,
                                                   icon_url=message.author.avatar_url)
@@ -1278,18 +1257,20 @@ async def on_message(message):
                             else:
                                 await msg.clear_reactions()
                                 if str(r.emoji) == "✅":
-                                    if str(tradee.id) not in db["players"]:
-                                        db["players"][str(tradee.id)] = {"scrap": 0, "trading": "", "items": [],
-                                                                         "shows": {}}
-                                    if str(message.author.id) not in db["players"]:
-                                        db["players"][str(message.author.id)] = {"scrap": 0, "trading": "", "items": [],
-                                                                                 "shows": {}}
-                                    if trading() == "" and db["players"][str(tradee.id)]["trading"] == "":
-                                        db["players"][str(tradee.id)]["trading"] = msg.jump_url
-                                        db["players"][str(message.author.id)]["trading"] = msg.jump_url
+                                    if str(tradee.id) not in data["players"]:
+                                        data["players"][str(tradee.id)] = {"scrap": 0, "trading": "", "items": [],
+                                                                           "shows": {}}
+                                    if str(message.author.id) not in data["players"]:
+                                        data["players"][str(message.author.id)] = {"scrap": 0, "trading": "",
+                                                                                   "items": [],
+                                                                                   "shows": {}}
+                                    if trading() == "" and data["players"][str(tradee.id)]["trading"] == "":
+                                        data["players"][str(tradee.id)]["trading"] = msg.jump_url
+                                        data["players"][str(message.author.id)]["trading"] = msg.jump_url
                                         embed = discord.Embed(description="\n".join(displayedTrader) + "\n" + "".join(
                                             scrapTrader) + scrapEmoji + "\n▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃\n" + "".join(
                                             scrapTradee) + scrapEmoji + "\n" + "\n".join(displayedTradee))
+                                        update_data()
                                         embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                                         embed.set_footer(text=tradee.name, icon_url=tradee.avatar_url)
                                         embed.set_thumbnail(
@@ -1320,8 +1301,9 @@ async def on_message(message):
                                                 reaction, user = await client.wait_for('reaction_add', check=checkR,
                                                                                        timeout=45)
                                             except asyncio.TimeoutError:
-                                                db["players"][str(tradee.id)]["trading"] = ""
-                                                db["players"][str(message.author.id)]["trading"] = ""
+                                                data["players"][str(tradee.id)]["trading"] = ""
+                                                data["players"][str(message.author.id)]["trading"] = ""
+                                                update_data()
                                                 tt = True
                                                 break
                                             else:
@@ -1344,12 +1326,12 @@ async def on_message(message):
                                                     error = ""
                                                     if not m.author.bot:
                                                         if m.author.id == reactor.id:
-                                                            scrap = db["players"][str(m.author.id)]["scrap"]
+                                                            scrap = data["players"][str(m.author.id)]["scrap"]
                                                             if m.content.isnumeric():
                                                                 guild1, count1 = getItem(m.author.id, int(m.content))
                                                                 if guild1 != False:
                                                                     i = guild1 + "|" + str(count1)
-                                                                    splits = db["players"][str(m.author.id)][guild1][
+                                                                    splits = data["players"][str(m.author.id)][guild1][
                                                                         count1 - 1].split("|")
                                                                     if len(splits) == 5:
                                                                         addItem = "`" + m.content + "` " + emojis[
@@ -1415,7 +1397,7 @@ async def on_message(message):
                                                                 guild1, count1 = getItem(m.author.id, int(m.content))
                                                                 if guild1 != False:
                                                                     i = guild1 + "|" + str(count1)
-                                                                    splits = db["players"][str(m.author.id)][guild1][
+                                                                    splits = data["players"][str(m.author.id)][guild1][
                                                                         count1 - 1].split("|")
                                                                     if len(splits) == 5:
                                                                         addItem = "`" + m.content + "` " + emojis[
@@ -1497,7 +1479,7 @@ async def on_message(message):
                                                         tradeeAgree = False
 
                                                 # add item
-                                                elif str(reaction.emoji) == "⏫" and str(user.id) in db["players"]:
+                                                elif str(reaction.emoji) == "⏫" and str(user.id) in data["players"]:
                                                     traderAgree = False
                                                     tradeeAgree = False
                                                     embed = discord.Embed(
@@ -1514,7 +1496,7 @@ async def on_message(message):
                                                     await m2.delete()
 
                                                 # remove item
-                                                elif str(reaction.emoji) == "⏬" and str(user.id) in db["players"]:
+                                                elif str(reaction.emoji) == "⏬" and str(user.id) in data["players"]:
                                                     traderAgree = False
                                                     tradeeAgree = False
                                                     embed = discord.Embed(
@@ -1563,47 +1545,58 @@ async def on_message(message):
                                                 url="https://cdn.discordapp.com/attachments/929182726203002920/930380635300823060/temp-removebg-preview.png")
                                             await msg.edit(embed=embed)
 
-                                            if str(tradee.id) not in db["players"]:
-                                                db["players"][str(tradee.id)] = {"scrap": 0, "trading": "", "items": [],
-                                                                                 "shows": {}}
-                                            if str(message.author.id) not in db["players"]:
-                                                db["players"][str(message.author.id)] = {"scrap": 0, "trading": "",
-                                                                                         "items": [], "shows": {}}
+                                            if str(tradee.id) not in data["players"]:
+                                                data["players"][str(tradee.id)] = {"scrap": 0, "trading": "",
+                                                                                   "items": [],
+                                                                                   "shows": {}}
+                                            if str(message.author.id) not in data["players"]:
+                                                data["players"][str(message.author.id)] = {"scrap": 0, "trading": "",
+                                                                                           "items": [], "shows": {}}
+
+                                            update_data()
 
                                             for x in traderTrades:
                                                 gi = x.split("|")
-                                                other = db["players"][str(message.author.id)][gi[0]]
-                                                if gi[0] not in db["players"][str(tradee.id)]:
-                                                    db["players"][str(tradee.id)][gi[0]] = []
-                                                db["players"][str(tradee.id)][gi[0]].append(other[int(gi[1]) - 1])
-                                                db["players"][str(message.author.id)][gi[0]].remove(
+                                                other = data["players"][str(message.author.id)][gi[0]]
+                                                if gi[0] not in data["players"][str(tradee.id)]:
+                                                    data["players"][str(tradee.id)][gi[0]] = []
+                                                data["players"][str(tradee.id)][gi[0]].append(other[int(gi[1]) - 1])
+                                                data["players"][str(message.author.id)][gi[0]].remove(
                                                     other[int(gi[1]) - 1])
+
+                                                update_data()
 
                                             for x in tradeeTrades:
                                                 gi = x.split("|")
-                                                other = db["players"][str(tradee.id)][gi[0]]
-                                                if gi[0] not in db["players"][str(message.author.id)]:
-                                                    db["players"][str(message.author.id)][gi[0]] = []
-                                                db["players"][str(message.author.id)][gi[0]].append(
+                                                other = data["players"][str(tradee.id)][gi[0]]
+                                                if gi[0] not in data["players"][str(message.author.id)]:
+                                                    data["players"][str(message.author.id)][gi[0]] = []
+                                                data["players"][str(message.author.id)][gi[0]].append(
                                                     other[int(gi[1]) - 1])
-                                                db["players"][str(tradee.id)][gi[0]].remove(other[int(gi[1]) - 1])
+                                                data["players"][str(tradee.id)][gi[0]].remove(other[int(gi[1]) - 1])
 
                                             if scrapTrader[0] != "0":
-                                                db["players"][str(tradee.id)]["scrap"] = db["players"][str(tradee.id)][
-                                                                                             "scrap"] + int(
-                                                    scrapTrader[0])
-                                                db["players"][str(message.author.id)]["scrap"] = \
-                                                    db["players"][str(message.author.id)]["scrap"] - int(scrapTrader[0])
+                                                data["players"][str(tradee.id)]["scrap"] = \
+                                                    data["players"][str(tradee.id)][
+                                                        "scrap"] + int(
+                                                        scrapTrader[0])
+                                                data["players"][str(message.author.id)]["scrap"] = \
+                                                    data["players"][str(message.author.id)]["scrap"] - int(
+                                                        scrapTrader[0])
 
                                             if scrapTradee[0] != "0":
-                                                db["players"][str(tradee.id)]["scrap"] = db["players"][str(tradee.id)][
-                                                                                             "scrap"] - int(
-                                                    scrapTradee[0])
-                                                db["players"][str(message.author.id)]["scrap"] = \
-                                                    db["players"][str(message.author.id)]["scrap"] + int(scrapTradee[0])
+                                                data["players"][str(tradee.id)]["scrap"] = \
+                                                    data["players"][str(tradee.id)][
+                                                        "scrap"] - int(
+                                                        scrapTradee[0])
+                                                data["players"][str(message.author.id)]["scrap"] = \
+                                                    data["players"][str(message.author.id)]["scrap"] + int(
+                                                        scrapTradee[0])
 
-                                            db["players"][str(tradee.id)]["trading"] = ""
-                                            db["players"][str(message.author.id)]["trading"] = ""
+                                            data["players"][str(tradee.id)]["trading"] = ""
+                                            data["players"][str(message.author.id)]["trading"] = ""
+
+                                            update_data()
 
                                         else:
                                             await msg.clear_reactions()
@@ -1632,8 +1625,10 @@ async def on_message(message):
                                                 embed.set_thumbnail(
                                                     url="https://cdn.discordapp.com/attachments/929182726203002920/930394152309510184/images-removebg-preview.png")
                                             await msg.edit(embed=embed)
-                                            db["players"][str(tradee.id)]["trading"] = ""
-                                            db["players"][str(message.author.id)]["trading"] = ""
+                                            data["players"][str(tradee.id)]["trading"] = ""
+                                            data["players"][str(message.author.id)]["trading"] = ""
+
+                                            update_data()
                                     else:
                                         embed.set_author(name=message.author.name + (
                                             " -- [🚫 Cancelled]" if user2.id == message.author.id else ""),
@@ -1647,8 +1642,8 @@ async def on_message(message):
                                         if trading() == "":
                                             await error(message,
                                                         f"{message.author.mention}, Current active trade [here]({trading()})")
-                                        if db["players"][str(tradee.id)]["trading"] == "":
-                                            tr = db["players"][str(tradee.id)]["trading"]
+                                        if data["players"][str(tradee.id)]["trading"] == "":
+                                            tr = data["players"][str(tradee.id)]["trading"]
                                             await error(message, f"{tradee.mention}, Current active trade [here]({tr})")
                                 else:
                                     embed = discord.Embed(description="🚫 **Trade Denied**")
@@ -1667,17 +1662,23 @@ async def on_message(message):
 
 @client.event
 async def on_guild_join(guild):
-    if db[str(guild.id)] not in db:
-        db[str(guild.id)] = {"prefix": "!", "name": guild.name, "join": False}  # for database support
+    if str(guild.id) not in data:
+        data[str(guild.id)] = {"prefix": "!", "name": guild.name, "join": False}
+    update_data()
 
 
 @client.event
 async def on_guild_update(before, after):
-    if str(before.id) not in db:
-        db[str(before.id)] = {"prefix": "!", "name": after.name, "join": False}
-    db[str(before.id)] = {"prefix": db[str(before.id)]["prefix"], "name": after.name, "join": False}
+    if str(before.id) not in data:
+        data[str(before.id)] = {"prefix": "!", "name": after.name, "join": False}
+    data[str(before.id)] = {"prefix": data[str(before.id)]["prefix"], "name": after.name, "join": False}
+    update_data()
 
 
-# run bot
-# Add a secret environment variable named TOKEN in replit (lock icon on left sidebar)
-client.run(os.environ.get("TOKEN"))
+with open('data.json', encoding="utf-8") as f:
+    data = json.load(f)
+
+with open('config.json', encoding="utf-8") as f:
+    config = json.load(f)
+
+client.run(config['token'])
