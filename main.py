@@ -5,7 +5,6 @@
 #imports
 import discord #api
 import os #for virtual environment secrets on replit
-import keep_alive #this keeps our bot alive from the keep_alive.py file
 import asyncio #not needed unless creating loop tasks etc (you'll run into it)
 import json #to write db to a json file
 import requests #to check discord   api for limits/bans
@@ -1510,9 +1509,6 @@ async def on_guild_update(before, after):
     db[str(before.id)] = {"prefix": "!", "name" : after.name, "join" : False}
   db[str(before.id)] = {"prefix": db[str(before.id)]["prefix"], "name" : after.name, "join" : False}
 
-
-keep_alive.keep_alive() 
-#keep the bot running after the window closes, use UptimeRobot to ping the website at least every <60min. to prevent the website from going to sleep, turning off the bot
 
 #run bot
 #Add a secret environment variable named TOKEN in replit (lock icon on left sidebar)
